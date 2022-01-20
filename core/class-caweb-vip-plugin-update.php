@@ -1,19 +1,19 @@
 <?php
 /**
- * CAWeb NetAdmin
+ * CAWeb VIP
  *
  * @see https://github.com/WordPress/WordPress/blob/master/wp-admin/update.php
  * @see https://github.com/WordPress/WordPress/blob/master/wp-admin/includes/class-theme-upgrader.php
  * @see https://github.com/WordPress/WordPress/blob/master/wp-admin/includes/class-wp-upgrader.php
  *
- * @package CAWeb NetAdmin
+ * @package CAWeb VIP
  */
 
-if ( ! class_exists( 'CAWeb_NetAdmin_Plugin_Update' ) ) {
+if ( ! class_exists( 'CAWeb_VIP_Plugin_Update' ) ) {
 	/**
-	 * CAWeb NetAdmin Plugin Upgrader
+	 * CAWeb VIP Plugin Upgrader
 	 */
-	class CAWeb_NetAdmin_Plugin_Update {
+	class CAWeb_VIP_Plugin_Update {
 
 		/**
 		 * Member Variable
@@ -79,8 +79,8 @@ if ( ! class_exists( 'CAWeb_NetAdmin_Plugin_Update' ) ) {
 				),
 			);
 
-			if ( get_site_option( 'caweb_netadmin_private_plugin_enabled', false ) ) {
-				$this->args['headers']['Authorization'] = 'Basic ' . base64_encode( ':' . get_site_option( 'caweb_netadmin_password', '' ) );
+			if ( get_site_option( 'caweb_vip_private_plugin_enabled', false ) ) {
+				$this->args['headers']['Authorization'] = 'Basic ' . base64_encode( ':' . get_site_option( 'caweb_vip_password', '' ) );
 			}
 
 			// define the alternative API for plugin update checking.
@@ -138,7 +138,7 @@ if ( ! class_exists( 'CAWeb_NetAdmin_Plugin_Update' ) ) {
 
 			$last_update = new stdClass();
 
-			$payload = wp_remote_get( sprintf( 'https://api.github.com/repos/%1$s/%2$s/releases/latest', get_site_option( 'caweb_netadmin_username', '' ), str_replace( ' ', '-', $this->plugin_name ) ), $this->args );
+			$payload = wp_remote_get( sprintf( 'https://api.github.com/repos/%1$s/%2$s/releases/latest', get_site_option( 'caweb_vip_username', '' ), str_replace( ' ', '-', $this->plugin_name ) ), $this->args );
 
 			if ( ! is_wp_error( $payload ) && wp_remote_retrieve_response_code( $payload ) === 200 ) {
 				$payload = json_decode( wp_remote_retrieve_body( $payload ) );
@@ -213,7 +213,7 @@ if ( ! class_exists( 'CAWeb_NetAdmin_Plugin_Update' ) ) {
 					$tmp['version']      = $caweb_update_plugins->response[ $this->plugin_file ]->new_version;
 					$tmp['last_updated'] = $caweb_update_plugins->response[ $this->plugin_file ]->published_date;
 
-					$tmp['sections']['Changelog'] = $this->caweb_netadmin_get_plugin_changelog( $tmp['version'] );
+					$tmp['sections']['Changelog'] = $this->caweb_vip_get_plugin_changelog( $tmp['version'] );
 
 					return (object) $tmp;
 				}
@@ -228,7 +228,7 @@ if ( ! class_exists( 'CAWeb_NetAdmin_Plugin_Update' ) ) {
 		 *
 		 * @return string
 		 */
-		public function caweb_netadmin_get_plugin_changelog( $ver = 'master' ) {
+		public function caweb_vip_get_plugin_changelog( $ver = 'master' ) {
 			$logurl = sprintf( '%1$s/contents/changelog.txt?ref=%2$s', $this->repo, $ver );
 
 			$changelog = wp_remote_get( $logurl, $this->args );
@@ -278,7 +278,7 @@ if ( ! class_exists( 'CAWeb_NetAdmin_Plugin_Update' ) ) {
 			$view_details = array(
 				'slug'     => plugin_basename( plugin_dir_path( __DIR__ ) ),
 				'author'   => 'Jesus D. Guzman',
-				'name'     => sprintf( '<img src="%1$s/%2$s/logo.png" class="caweb-netadmin-plugin-update-logo"> CAWeb NetAdmin', WP_PLUGIN_URL, plugin_basename( plugin_dir_path( __DIR__ ) ) ),
+				'name'     => sprintf( '<img src="%1$s/%2$s/logo.png" class="caweb-vip-plugin-update-logo"> CAWeb VIP', WP_PLUGIN_URL, plugin_basename( plugin_dir_path( __DIR__ ) ) ),
 				'sections' => array(
 					'Description' => '<p>A CAWeb Utility Plugin that allows for extra mime-type support not supported by WordPress. Also allows for mapping registered domains to their appropriate urls.</p><p>The following extra mime-types have been registered:</p><ul><li>application/x-mspublisher</li><li>application/vnd.ms-infopath</li><li>text/xml</li><li>application/vnd.google-earth.kml+xml</li><li>application/vnd.google-earth.kmz</li><li>x-image/x-icon</li></ul>',
 				),
@@ -291,5 +291,5 @@ if ( ! class_exists( 'CAWeb_NetAdmin_Plugin_Update' ) ) {
 	}
 }
 
-new CAWeb_NetAdmin_Plugin_Update( plugin_basename( plugin_dir_path( __DIR__ ) ) );
+new CAWeb_VIP_Plugin_Update( plugin_basename( plugin_dir_path( __DIR__ ) ) );
 
