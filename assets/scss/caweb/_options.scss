@@ -1,0 +1,15 @@
+/* Menu List */
+.menu-list li.list-group-item:not(.selected){
+	background-color: #fff !important;
+}
+.menu-list li.list-group-item:not(.selected):hover a {
+	color: #fff !important;
+}
+
+/* Site Listing */
+#site-results ol{
+	list-style-position: inside;
+}
+#site-results ul{
+	list-style-type: disc;
+}

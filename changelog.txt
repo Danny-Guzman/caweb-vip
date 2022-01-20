@@ -1,0 +1,33 @@
+CAWeb NetAdmin 1.2.1
+Sept 22, 2017
+- Label changes made
+
+CAWeb NetAdmin 1.2.0
+Sept 1, 2017
+- Users can now set a freeze time range for frozen sites
+
+CAWeb NetAdmin 1.1.0
+July 7, 2017
+- Users can now freeze access to individual sites
+
+CAWeb NetAdmin 1.0.4
+June 5, 2017
+- Allows for mapping registered domains to their appropriate urls.
+
+CAWeb NetAdmin 1.0.3
+May 31, 2017
+- Created a one step process for adding Mime types
+
+CAWeb NetAdmin 1.0.2
+May 5, 2017
+- Extracted Intranet Functionality
+- Added .pub mime type application/x-mspublisher
+- Added .xsn application/vnd.ms-infopath
+
+CAWeb NetAdmin 1.0.1
+Dec 1, 2016
+- Plugin can set sites as an intranet
+- Added .xml text/xml
+- Added .kml application/vnd.google-earth.kml+xml
+- Added .kmz application/vnd.google-earth.kmz
+- Added .ico x-image/x-icon
