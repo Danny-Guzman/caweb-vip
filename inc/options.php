@@ -11,7 +11,7 @@ add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', 'caweb_vip_plu
  * CAWeb VIP Administration Menu Setup
  * Fires before the administration menu loads in the admin.
  *
- * @link https://developer.wordpress.org/reference/hooks/admin_menu/
+ * @link   https://developer.wordpress.org/reference/hooks/admin_menu/
  * @return void
  */
 function caweb_vip_plugin_menu() {
@@ -28,7 +28,6 @@ function caweb_vip_plugin_menu() {
  * @return void
  */
 function caweb_vip_plugin_options() {
-
 	$nonce = wp_create_nonce( 'caweb_vip_settings' );
 
 	if ( ! wp_verify_nonce( $nonce, 'caweb_vip_settings' ) ) {
@@ -40,9 +39,9 @@ function caweb_vip_plugin_options() {
 	}
 	global $wp;
 
-	$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : 'general';
+	$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : 'caweb-vip';
 
-	$hide_save    = in_array( $page, array(), true ) ? ' invisible' : '';
+	$hide_save = in_array( $page, array(), true ) ? ' invisible' : '';
 
 	$user_color = caweb_vip_get_user_color()->colors[2];
 
@@ -51,17 +50,17 @@ function caweb_vip_plugin_options() {
 		.menu-list li.list-group-item,
 		.menu-list li.list-group-item:hover {
 			background-color: 
-			<?php
-			print esc_attr( $user_color );
-			?>
+	<?php
+	print esc_attr( $user_color );
+	?>
 			!important;
 		}
 
 		.menu-list li.list-group-item:not(.selected) a {
 			color: 
-			<?php
-			print esc_attr( $user_color );
-			?>
+	<?php
+	print esc_attr( $user_color );
+	?>
 			!important;
 		}
 	</style>
@@ -97,36 +96,88 @@ function caweb_vip_plugin_options() {
  * @return void
  */
 function caweb_vip_display_general( $site_listing = array() ) {
-	caweb_vip_display_mime_types();
+	caweb_vip_display_cache_settings();
 }
 
 /**
- * Display Mime types enabled.
+ * Display Cache Setting.
  *
  * @return void
  */
-function caweb_vip_display_mime_types() {
+function caweb_vip_display_cache_settings() {
 	?>
-	<!--div class="p-2 border-bottom border-secondary mb-2">
+<div class="p-2 mb-2 border-bottom border-secondary">
 		<div class="form-row">
 			<div class="form-group">
-				<h2 class="d-inline">Mime Types</h2>
+				<h2 class="d-inline">Purge By URL</h2>
 			</div>
 		</div>
 		<div class="form-row">
 			<div class="form-group col-sm-12">
-				<h4 class="d-inline">WordPress</h4>
-				<input type="text" class="form-control" readonly value="<?php print ''; ?>" />
+				<p class="mb-0">1) Enter <strong>URL</strong> to be purged.</p>
+				<p class="mb-0 ml-3"><span class="font-weight-bold">URL: <span class="text-danger">*</span></span> 
+					<input type="text" class="form-control" name="caweb_vip_page_cache_url" placeholder="https://example.ca.gov/" required="">
+				</p>
 			</div>
 		</div>
 		<div class="form-row">
 			<div class="form-group col-sm-12">
-				<h4 class="d-inline">CAWeb</h4>
-				<input type="text" class="form-control" readonly value="<?php print ''; ?>" />
+				<p class="mb-0">2) Select <strong>Cache Type</strong> <span class="text-danger">*</span></p>
+				<p class="mb-0 ml-3">
+					<label class="d-block" for="caweb_vip_page_cache_type_php">
+						<input type="radio" checked="" class="form-control" name="caweb_vip_page_cache_type" required="" id="caweb_vip_page_cache_type_php" value="php">
+						PHP
+					</label>
+					<label for="caweb_vip_page_cache_type_static">
+						<input type="radio" class="form-control" name="caweb_vip_page_cache_type" required="" id="caweb_vip_page_cache_type_static" value="static">
+						Static
+					</label>
+				</p>
 			</div>
 		</div>
-	</div-->
-
+		<div class="form-row">
+			<div class="form-group col-sm-12">
+				<input type="button" id="caweb-vip-purge-url" class="ml-3 btn btn-primary" value="Purge">
+				<div class="spinner-border d-none align-middle" role="status">
+					<span class="sr-only">Loading...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="p-2 mb-2">
+		<div class="form-row">
+			<div class="form-group">
+				<h2 class="d-inline">Purge ALL Site Cache</h2>
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="form-group col-sm-12">
+				<p class="mb-0">1) Select a site.</p>
+				<p class="mb-0 ml-3"><span class="font-weight-bold">Site</span> <span class="text-danger">*</span></p>
+				<select class="ml-3 form-control" name="caweb_vip_site_cache_url" required="">
+								<option value="1">localhost:8888</option>
+								</select>
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="form-group col-sm-12">
+				<p class="mb-0 ml-3">
+					<label class="d-block" for="caweb_vip_site_cache_confirm">
+						<input type="checkbox" required="" class="form-control" name="caweb_vip_site_cache_confirm" id="caweb_vip_site_cache_confirm">
+						Acknowledgement. By checking this box I acknowledge that I am going to purge ALL cache objects for the site listed above. <span class="text-danger">*</span>
+					</label>
+				</p>
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="form-group col-sm-12">
+				<input type="button" id="caweb-vip-purge-site" class="ml-3 btn btn-primary" value="Purge All">
+				<div class="spinner-border d-none align-middle" role="status">
+					<span class="sr-only">Loading...</span>
+				</div>
+			</div>
+		</div>
+	</div>
 	<?php
 }
 
@@ -139,82 +190,24 @@ function caweb_vip_save_plugin_settings() {
 	$verified = isset( $_POST['caweb_vip_settings_nonce'] ) &&
 	wp_verify_nonce( sanitize_key( $_POST['caweb_vip_settings_nonce'] ), 'caweb_vip_settings' );
 
-	$page  = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
-	$blank = false;
+	$page   = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+	$notice = true;
 
 	if ( $verified && ! empty( $page ) ) {
 		switch ( $page ) {
-			case 'alias-redirect':
-				$aliases       = isset( $_POST['alias'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['alias'] ) ) : array();
-				$aliases_url   = isset( $_POST['alias_url'] ) ? array_map( 'esc_url_raw', wp_unslash( $_POST['alias_url'] ) ) : array();
-				$registrations = array();
-
-				foreach ( $aliases as $a => $name ) {
-					if ( ! empty( trim( $name ) ) ) {
-						$registrations[ $name ] = $aliases_url[ $a ];
-					} else {
-						$blank = true;
-					}
-				}
-
-				update_site_option( 'registered_sites', $registrations );
-
-				break;
-			case 'api':
-				$privated_enabled = isset( $_POST['caweb_vip_private_plugin_enabled'] ) ? sanitize_text_field( wp_unslash( $_POST['caweb_vip_private_plugin_enabled'] ) ) : false;
-				$privated_enabled = 'on' === $privated_enabled ? true : false;
-				$username         = isset( $_POST['caweb_vip_username'] ) ? sanitize_text_field( wp_unslash( $_POST['caweb_vip_username'] ) ) : 1;
-				$password         = isset( $_POST['caweb_vip_password'] ) ? sanitize_text_field( wp_unslash( $_POST['caweb_vip_password'] ) ) : 1;
-
-				update_site_option( 'caweb_vip_private_plugin_enabled', $privated_enabled );
-				update_site_option( 'caweb_vip_username', $username );
-				update_site_option( 'caweb_vip_password', $password );
-
-				break;
-			case 'disc-estimator':
-				$datacost = isset( $_POST['datacost'] ) ? sanitize_text_field( wp_unslash( $_POST['datacost'] ) ) : '2.00';
-				$datafree = isset( $_POST['datafree'] ) ? sanitize_text_field( wp_unslash( $_POST['datafree'] ) ) : 1;
-
-				update_site_option( 'caweb_datacost', $datacost );
-				update_site_option( 'caweb_datafree', $datafree );
-
-				break;
-			case 'site-freeze':
-				$frozen      = isset( $_POST['frozen_url'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['frozen_url'] ) ) : array();
-				$frozen_urls = array();
-
-				foreach ( $frozen as $i => $f ) {
-					$start = isset( $_POST['frozen_url_start'][ $i ] ) ? sanitize_text_field( wp_unslash( $_POST['frozen_url_start'][ $i ] ) ) : '';
-					$end   = isset( $_POST['frozen_url_end'][ $i ] ) ? sanitize_text_field( wp_unslash( $_POST['frozen_url_end'][ $i ] ) ) : '';
-
-					$frozen_urls[ $f ] = array(
-						'startdate'  => $start,
-						'enddate'    => $end,
-					);
-				}
-
-				update_site_option( 'frozen_sites', $frozen_urls );
-
-				break;
 			default:
-				$limit = isset( $_POST['revision_limit'] ) ? sanitize_text_field( wp_unslash( $_POST['revision_limit'] ) ) : 0;
-				$region = isset( $_POST['default_region'] ) ? true : false;
-
-				update_site_option( 'caweb_vip_default_region', $region );
-				update_site_option( 'caweb_vip_revision_limit', $limit );
 				break;
 		}
-		caweb_vip_mime_option_notices( $blank );
-	} else {
-		caweb_vip_mime_option_notices( true );
 	}
+
+	caweb_vip_mime_option_notices( true );
 
 }
 
 /**
  * CAWeb VIP message hook
  *
- * @param  bool $error If there were any errors.
+ * @param bool $error If there were any errors.
  *
  * @return void
  */

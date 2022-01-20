@@ -7133,385 +7133,64 @@
 })));
 //# sourceMappingURL=bootstrap.bundle.js.map
 
-/* CAWeb NetAdmin Disc Estimator Javascript */
+/* CAWeb VIP Cache Javascript */
 jQuery(document).ready(function($) {
-	$('#recalc').click(function(){
-		$('#discs tbody').empty();
-		$('#discs tbody').append('<tr><td colspan="4">Calculating Disc Usage...</td></tr>');
+	$('#caweb-vip-options-form #caweb-vip-purge-url').on('click', function(e){
+		e.preventDefault();
+		var url = $('input[name="caweb_vip_page_cache_url"]')[0];
+		var type = $('input[name="caweb_vip_page_cache_type"]:checked')[0];
+		var spinner = $(this).next();
+
+		if( ! url.checkValidity() ){
+			url.reportValidity();
+			return;
+		}
+		
+		if( ! type.checkValidity() ){
+			type.reportValidity();
+			return;
+		}
+
+		$(spinner).removeClass('d-none');
 
 		var data = {
-		  'action': 'caweb_netadmin_recalc_disc_estimate',
-		  'cost' : $('input[name="datacost"]').val(),
-		  'free' : $('input[name="datafree"]').val(),
-		  'nonce' : $('input[name="caweb_netadmin_settings_nonce"]').val()
+		  'action': 'caweb_vip_clear_cache',
+		  'nonce' : $('input[name="caweb_vip_settings_nonce"]').val(),
+		  'url' : url.value,
+		  'type' : type.value,
 		};
 	  
 		jQuery.post(ajaxurl, data, function(response) {
-			$('#discs tbody').empty();
-	  
-			Object.keys( response ).forEach(function(id){
-				var overage = 0 !== response[id].folder_info.overage ? 'overcharge' : '';
-				var row = document.createElement('TR');
-				var blogname = document.createElement('TD');
-				var blogname_link = document.createElement('A');
-				var size = document.createElement('TD');
-				var datafree = document.createElement('TD');
-				var datacost = document.createElement('TD');
-
-				$(row).addClass(overage);
-
-				$(blogname_link).html(response[id].blogname);
-				$(blogname_link).attr('href', response[id].siteurl);
-				
-				$(size).html( response[id].folder_info.size + response[id].folder_info.label );
-				$(size).addClass('text-center');
-
-				$(datafree).html( $('input[name="datafree"]').val() + 'gb / ' + response[id].folder_info.overage + response[id].folder_info.overage_label);
-				$(datafree).addClass('text-center');
-				
-				$(datacost).html( '$' + response[id].folder_info.overage_cost);
-				$(datacost).addClass('text-center');
-
-				$(blogname).append(blogname_link);
-
-				$(row).append(blogname);
-				$(row).append(size);
-				$(row).append(datafree);
-				$(row).append(datacost);
-
-				$('#discs tbody').append(row);
-			});
-
-			var newHref = $('#caweb_netadmin_download_disc_report')[0].href;
-			newHref = newHref.replace(/free=[\d.]+/g, 'free=' + $('input[name="datafree"]').val() );
-			newHref = newHref.replace(/cost=[\d.]+/g, 'cost=' + $('input[name="datacost"]').val() ); 
-			$('#caweb_netadmin_download_disc_report').attr('href', newHref);
-
+			$(spinner).addClass('d-none');
 		});
 	});
 
-	$('#datacost, #datafree').on('input', function(){
-		var filterFloat = function(value) {
-			if (/([A-z])/.test(value))
-				value = value.replace(/([A-z])/g,""); 
-				
-			if (/\.(\d){3,}/.test(value) || /\d*(\.)\d*(\.)/.test(value) )
-				return value.slice(0, value.length - 1 ); 
-				
-			return value;
-		}
-		$(this)[0].value = filterFloat($(this).val());
-	});
-});
-
-/* CAWeb NetAdmin Site Freeze Javascript */
-jQuery(document).ready(function($) {
-	$('.new-site-freeze').click(function(e){
+	$('#caweb-vip-options-form #caweb-vip-purge-site').on('click', function(e){
 		e.preventDefault();
-		var freezeList = $('#caweb-netadmin-site-freeze');
-		var li = document.createElement('LI');
-
-		var group_a = document.createElement('DIV');
-		var group_a_label = document.createElement('H4');
-		var group_a_input = document.createElement('SELECT');
-
-		var group_b = document.createElement('DIV');
-		var group_b_label = document.createElement('H4');
-		var group_b_input = document.createElement('INPUT');
-
-		var group_c = document.createElement('DIV');
-		var group_c_label = document.createElement('H4');
-		var group_c_input = document.createElement('INPUT');
-		var group_c_remove = document.createElement('BUTTON');
-
-		// List Item
-		$(li).addClass('py-2');
+		var site = $('select[name="caweb_vip_site_cache_url"] option:selected')[0];
+		var confirm = $('input[name="caweb_vip_site_cache_confirm"]')[0];
+		var spinner = $(this).next();
 		
-		// Group A
-		$(group_a).addClass('form-group');
+		if( ! confirm.checkValidity() ){
+			confirm.reportValidity();
+			return;
+		}
 
-		$(group_a_label).addClass('d-inline mr-1');
-		$(group_a_label).html('Site');
-
-		$(group_a_input).addClass('form-control-sm');
-		$(group_a_input).attr('name', 'frozen_url[]');
-
-		$(group_a).append(group_a_label);
-		$(group_a).append(group_a_input);
+		$(spinner).removeClass('d-none');
 
 		var data = {
-			'action': 'caweb_netadmin_get_unfrozen_sites'
+		  'action': 'caweb_vip_clear_all_cache',
+		  'nonce' : $('input[name="caweb_vip_settings_nonce"]').val(),
+		  'blog_id' : site.value,
 		};
-
+	  
 		jQuery.post(ajaxurl, data, function(response) {
-			response.forEach( function(val){
-				var o = document.createElement('OPTION');
-				$(o).val(val);
-				$(o).html(val);
-				$(group_a_input).append(o);
-			});
-		});		
-
-		// Group B
-		$(group_b).addClass('form-group d-inline-block mr-3');
-
-		$(group_b_label).addClass('d-inline mr-1');
-		$(group_b_label).html('Start Date');
-
-		$(group_b_input).addClass('form-control-sm mr-1');
-		$(group_b_input).attr('name', 'frozen_url_start[]');
-		$(group_b_input).attr('type', 'datetime-local');
-
-
-		$(group_b).append(group_b_label);
-		$(group_b).append(group_b_input);
-
-		// Group C
-		$(group_c).addClass('form-group d-inline-block');
-
-		$(group_c_label).addClass('d-inline mr-1');
-		$(group_c_label).html('End Date');
-
-		$(group_c_input).addClass('form-control-sm mr-1');
-		$(group_c_input).attr('name', 'frozen_url_end[]');
-		$(group_c_input).attr('type', 'datetime-local');
-
-		$(group_c_remove).addClass('btn btn-sm btn-primary align-bottom ml-2 remove-alias-redirect');
-		$(group_c_remove).html('Remove');
-		group_c_remove.addEventListener('click', remove_site_freeze );
-
-		$(group_c).append(group_c_label);
-		$(group_c).append(group_c_input);
-		$(group_c).append(group_c_remove);
-
-		// Redirect List
-		$(li).append(group_a);
-		$(li).append(group_b);
-		$(li).append(group_c);
-
-		$(freezeList).append(li);
-	});
-
-	$('.remove-site-freeze').click( remove_site_freeze );
-
-	function remove_site_freeze( e ){
-		e.preventDefault();
-		$(this).parent().parent().remove();
-	}
-});
-/* CAWeb NetAdmin Alias Redirect Javascript */
-jQuery(document).ready(function($) {
-	$('.new-alias-redirect').click(function(e){
-		e.preventDefault();
-		var redirectList = $('#caweb-netadmin-alias-redirects');
-		var li = document.createElement('LI');
-		var group_a = document.createElement('DIV');
-		var group_a_label = document.createElement('H4');
-		var group_a_input = document.createElement('INPUT');
-
-		var group_b = document.createElement('DIV');
-		var group_b_label = document.createElement('H4');
-		var group_b_input = document.createElement('SELECT');
-		var group_b_remove = document.createElement('BUTTON');
-
-		// List Item
-		$(li).addClass('py-2');
-		
-		// Group A
-		$(group_a).addClass('form-group d-inline-block mr-2 mb-0 align-middle');
-
-		$(group_a_label).addClass('d-inline mr-1');
-		$(group_a_label).html('Alias');
-
-		$(group_a_input).addClass('form-control-sm');
-		$(group_a_input).attr('name', 'alias[]');
-		$(group_a_input).attr('type', 'text');
-
-		$(group_a).append(group_a_label);
-		$(group_a).append(group_a_input);
-
-		// Group B
-		$(group_b).addClass('form-group d-inline-block mb-0 align-middle');
-
-		$(group_b_label).addClass('d-inline mr-1');
-		$(group_b_label).html('CAWeb Site');
-
-		$(group_b_input).addClass('form-control-sm mr-1');
-		$(group_b_input).attr('name', 'alias_url[]');
-
-		Object.keys( caweb_netadmin_args.sitesdata ).forEach( function(val){
-			var o = document.createElement('OPTION');
-			$(o).val(caweb_netadmin_args.sitesdata[val]['siteurl']);
-			$(o).html(caweb_netadmin_args.sitesdata[val]['siteurl']);
-			$(group_b_input).append(o);
-		});
-
-		$(group_b_remove).addClass('btn btn-sm btn-primary align-bottom ml-2 remove-alias-redirect');
-		$(group_b_remove).html('Remove');
-		group_b_remove.addEventListener('click', remove_alias_redirect );
-
-		$(group_b).append(group_b_label);
-		$(group_b).append(group_b_input);
-		$(group_b).append(group_b_remove);
-
-		// Redirect List
-		$(li).append(group_a);
-		$(li).append(group_b);
-
-		$(redirectList).append(li);
-	});
-
-	$('.remove-alias-redirect').click( remove_alias_redirect );
-
-	function remove_alias_redirect( e ){
-		e.preventDefault();
-		$(this).parent().parent().remove();
-	}
-});
-/* CAWeb NetAdmin Site Freeze Javascript */
-jQuery(document).ready(function($) {
-	var output = $('#site-results');
-
-	$('input[name="caweb-netadmin-site-display"]').click(function(){
-		$(output).empty();
-
-		switch( $(this).val() ){
-			case 'numbered':
-				numbered_view();
-				break;
-			case 'csv':
-				csv_view();
-				break;
-			case 'bulleted':
-				bulleted_view();
-				break;
-		}
-	})
-
-	function numbered_view(){
-		var u = document.createElement('OL');
-		$(u).addClass('ml-0');
-
-		Object.keys( caweb_netadmin_args.sitesdata ).forEach(function(id){
-			var l = document.createElement('LI');
-			$(l).html(caweb_netadmin_args.sitesdata[id].siteurl);
-			$(u).append(l);
-		});
-		
-		$(output).append(u);
-	}
-	
-	function csv_view(){
-		var table = document.createElement('TABLE');
-		var headers = ['ID', 'Fav Icon', 'Title', 'URL', 'Registered Created', 'Last Updated', 'Template', 'Theme',  'Menu Type', 'Color Scheme',
-						'Sticky Navigation', 'Live Drafts', 'Search Engine ID', 'Analytics ID', 'Meta ID', 'Google Translate'];
-		var thead = table.createTHead();
-		var tbody = document.createElement('tbody') ;
-		var trow = thead.insertRow();
-
-		$(table).addClass('table border');
-
-		for(var i = 0; i <  headers.length; i++){
-			var col = $(document.createElement('TH')).html( headers[i] );
-			$(trow).append(col);
-		}
-
-		Object.keys( caweb_netadmin_args.sitesdata ).forEach(function(id){
-			var site = caweb_netadmin_args.sitesdata[id];
-
-			var data_row = document.createElement('TR');
-			var gtrans = "" !== site.ca_google_trans_enabled ? site.ca_google_trans_enabled : "none";
-			var fav_ico = 'Not Set';
-			
-			gtrans = 1 == gtrans ? "standard" : gtrans;
-
-			if( "" !== site.ca_fav_ico && undefined !== site.ca_fav_ico ){
-				fav_ico = document.createElement('IMG');
-				$(fav_ico).attr('src', site.ca_fav_ico);
-			}
-			
-			$(data_row.insertCell()).html( site.blog_id ) ;
-			$(data_row.insertCell()).html( fav_ico ) ;
-			$(data_row.insertCell()).html( site.blogname ) ;
-			$(data_row.insertCell()).html( site.siteurl ) ;
-			$(data_row.insertCell()).html( site.registered ) ;
-			$(data_row.insertCell()).html( site.last_updated ) ;
-			$(data_row.insertCell()).html( site.ca_site_version ) ;
-			$(data_row.insertCell()).html( site.stylesheet ) ;
-			$(data_row.insertCell()).html( site.ca_default_navigation_menu ) ;
-			$(data_row.insertCell()).html( site.ca_site_color_scheme ) ;
-			$(data_row.insertCell()).html( site.ca_sticky_navigation ? 'on' : 'off' ) ;
-			$(data_row.insertCell()).html( site.caweb_live_drafts ? 'on' : 'off' ) ;
-			$(data_row.insertCell()).html( site.ca_google_search_id ) ;
-			$(data_row.insertCell()).html( site.ca_google_analytic_id ) ;
-			$(data_row.insertCell()).html( site.ca_google_meta_id ) ;
-			$(data_row.insertCell()).html( gtrans ) ;
-						
-			if( '1' === site.deleted){
-				$(data_row).addClass( 'bg-wp-error' );
-			}
-			
-			$(tbody).append(data_row);
-		});
-
-		var download = document.createElement('A');
-		$(download).html('Download');
-		$(download).addClass('btn btn-primary');
-		$(download).attr('href', caweb_netadmin_args.post_url + "&nonce=" + $('input[name="caweb_netadmin_settings_nonce"]').val() );
-
-		$(table).append(tbody);
-
-		$(output).append(table);
-		$(output).append(download);
-	}
-
-	function bulleted_view(){
-		var u = document.createElement('UL');
-		$(u).addClass('ml-4');
-
-		Object.keys( caweb_netadmin_args.sitesdata ).forEach(function(id){
-			var l = document.createElement('LI');
-			$(l).html(caweb_netadmin_args.sitesdata[id].siteurl);
-			$(u).append(l);
-		});
-		
-		$(output).append(u);
-	}
-
-	
-});
-/* CAWeb NetAdmin Transient Javascript */
-jQuery(document).ready(function($) {
-	$('#resetTransient').click(function( e ){
-		e.preventDefault();
-		var modified = $(this).next();
-		var fd = new FormData();
-		fd.append( 'action', 'caweb_netadmin_reset_transients' );
-		fd.append( 'nonce', $('input[name="caweb_netadmin_settings_nonce"]').val() );
-
-		jQuery.ajax({
-			url: ajaxurl,
-			type: 'POST',
-			data: fd,
-			processData: false,
-			contentType: false,
-			success: function( last_modified_date ){e
-				$(modified).html(last_modified_date );
-			}
+			$(spinner).addClass('d-none');
+			console.log(response);
 		});
 	});
-});
-
-/* CAWeb NetAdmin Disc Estimator Javascript */
-jQuery(document).ready(function($) {
-	$('.caweb-netadmin-site-list').on( 'change', function(){
-		var newHref = $($(this).next()).attr('href');
-		newHref = newHref.replace(/blog_id=[-]?\d*/g, 'blog_id=' + $(this).val() );
-		$($(this).next()).attr('href', newHref);
-	});
 
 });
-
 /* CAWeb NetAdmin Options Javascript */
 jQuery(document).ready(function($) {
 	"use strict";
@@ -7521,71 +7200,4 @@ jQuery(document).ready(function($) {
 		if( changeMade )
 				return 'Are you sure you want to leave?';
 	});
-	
-	$('#caweb-netadmin-options-form button').on('click', function(){  
-		changeMade = true;  
-	});
-		
-	$('#caweb-netadmin-options-form').submit(function( e){
-		e.preventDefault();
-		var errors = false;
-
-		// Check all Alias Redirects
-		$('input[name="alias[]"]').each(function(i){
-			var li = $(this).parent().parent();
-
-			if( ! $(this).val().trim() ){
-				$(li).addClass('bg-wp-error');
-
-				if( ! errors ){
-					if( ! $('a[href="#redirect"]').parent().hasClass('selected') )
-						$('a[href="#redirect"]').click(); 
-
-					alert( 'The Alias field can not be blank in Alias Redirects.' );
-					errors = true;
-				}
-			}else{
-				$(li).removeClass('bg-wp-error');
-			}
-		});
-		
-		// Check to ensure all Freeze sites have valid dates
-		$('#caweb-netadmin-site-freeze li').each(function(i){
-			var fstartdate = $(this).find('input[name="frozen_url_start[]"]');
-			var estartdate = $(this).find('input[name="frozen_url_end[]"]');
-			var result = dateCheck( fstartdate, estartdate );
-
-			if( result ){
-				$(this).removeClass('bg-wp-error');
-			}else{
-				$(this).addClass('bg-wp-error');
-
-				if( ! errors ){
-					if( ! $('a[href="#freeze"]').parent().hasClass('selected') )
-						$('a[href="#freeze"]').click(); 
-
-					alert( "End Date can not come before Start Date." );
-					errors = true;
-				}
-			}
-
-		});
-
-		if( ! errors ){
-			changeMade = false;
-			this.submit();
-		}
-		
-	});
-
-	function dateCheck(s, e){
-
-		// if start and end date picker are not empty, and the end date comes before the start date
-		if( $(s).val().trim() && $(e).val().trim() && 
-			new Date($(e).val()) <  new Date($(s).val()) ){
-			return false;
-		}
-		return true;
-	}
-	
 });
