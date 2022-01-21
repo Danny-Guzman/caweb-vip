@@ -16,9 +16,9 @@ add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', 'caweb_vip_plu
  */
 function caweb_vip_plugin_menu() {
 	$cap = is_multisite() ? 'manage_network_options' : 'manage_options';
-	add_menu_page( 'CAWeb VIP', 'CAWeb VIP', $cap, 'caweb-vip', 'caweb_vip_plugin_options', CAWEB_VIP_PLUGIN_URL . 'logo.png' );
 
-	add_submenu_page( 'caweb-vip', 'CAWeb VIP', 'CAWeb VIP', $cap, 'caweb-vip', 'caweb_vip_plugin_options' );
+	add_menu_page( 'CAWeb VIP', 'CAWeb VIP', $cap, 'caweb-vip', 'caweb_vip_plugin_options', CAWEB_VIP_PLUGIN_URL . 'logo.png' );
+	add_submenu_page( 'caweb-vip', 'CAWeb VIP', 'Cache', $cap, 'cache-settings', 'caweb_vip_plugin_options' );
 
 }
 
@@ -41,7 +41,7 @@ function caweb_vip_plugin_options() {
 
 	$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : 'caweb-vip';
 
-	$hide_save = in_array( $page, array(), true ) ? ' invisible' : '';
+	$hide_save = in_array( $page, array('cache-settings'), true ) ? ' invisible' : '';
 
 	$user_color = caweb_vip_get_user_color()->colors[2];
 
@@ -49,19 +49,11 @@ function caweb_vip_plugin_options() {
 	<style>
 		.menu-list li.list-group-item,
 		.menu-list li.list-group-item:hover {
-			background-color: 
-	<?php
-	print esc_attr( $user_color );
-	?>
-			!important;
+			background-color: 	<?php print esc_attr( $user_color ); ?> !important;
 		}
 
 		.menu-list li.list-group-item:not(.selected) a {
-			color: 
-	<?php
-	print esc_attr( $user_color );
-	?>
-			!important;
+			color: <?php print esc_attr( $user_color ); ?> !important;
 		}
 	</style>
 	<div class="container-fluid mt-4 d-grid">
@@ -92,11 +84,23 @@ function caweb_vip_plugin_options() {
 /**
  * Display General Settings for the current instance.
  *
- * @param  array $site_listing Array of Sites and various options with values.
  * @return void
  */
-function caweb_vip_display_general( $site_listing = array() ) {
-	caweb_vip_display_cache_settings();
+function caweb_vip_display_general() {
+	$session = get_site_option('caweb_vip_session_time', '');
+	
+	?>
+	<div class="p-2 mb-2 border-bottom border-secondary">
+		<div class="form-row">
+			<div class="form-group col-sm-12">
+				<h4 class="mb-0 d-inline">Session Timeout</h4>
+				<input type="text" class="form-control-sm" name="caweb_vip_session_time" required value="<?php print esc_attr( $session ); ?>">
+				<small class="text-muted d-block">Enter time in minutes</small>
+			</div>
+		</div>
+	</div>
+
+	<?php
 }
 
 /**
@@ -105,7 +109,13 @@ function caweb_vip_display_general( $site_listing = array() ) {
  * @return void
  */
 function caweb_vip_display_cache_settings() {
-	?>
+	if( is_multisite() ){
+		$sites = get_sites();
+	}else{
+		$sites = array((object)array( 'blog_id' => 1, 'guid' => get_site_url()));
+	}
+
+?>
 <div class="p-2 mb-2 border-bottom border-secondary">
 		<div class="form-row">
 			<div class="form-group">
@@ -116,7 +126,7 @@ function caweb_vip_display_cache_settings() {
 			<div class="form-group col-sm-12">
 				<p class="mb-0">1) Enter <strong>URL</strong> to be purged.</p>
 				<p class="mb-0 ml-3"><span class="font-weight-bold">URL: <span class="text-danger">*</span></span> 
-					<input type="text" class="form-control" name="caweb_vip_page_cache_url" placeholder="https://example.ca.gov/" required="">
+					<input type="text" class="form-control" name="caweb_vip_page_cache_url" placeholder="https://example.ca.gov/" required>
 				</p>
 			</div>
 		</div>
@@ -125,11 +135,11 @@ function caweb_vip_display_cache_settings() {
 				<p class="mb-0">2) Select <strong>Cache Type</strong> <span class="text-danger">*</span></p>
 				<p class="mb-0 ml-3">
 					<label class="d-block" for="caweb_vip_page_cache_type_php">
-						<input type="radio" checked="" class="form-control" name="caweb_vip_page_cache_type" required="" id="caweb_vip_page_cache_type_php" value="php">
+						<input type="radio" checked="" class="form-control" name="caweb_vip_page_cache_type" required id="caweb_vip_page_cache_type_php" value="php">
 						PHP
 					</label>
 					<label for="caweb_vip_page_cache_type_static">
-						<input type="radio" class="form-control" name="caweb_vip_page_cache_type" required="" id="caweb_vip_page_cache_type_static" value="static">
+						<input type="radio" class="form-control" name="caweb_vip_page_cache_type" required id="caweb_vip_page_cache_type_static" value="static">
 						Static
 					</label>
 				</p>
@@ -154,9 +164,11 @@ function caweb_vip_display_cache_settings() {
 			<div class="form-group col-sm-12">
 				<p class="mb-0">1) Select a site.</p>
 				<p class="mb-0 ml-3"><span class="font-weight-bold">Site</span> <span class="text-danger">*</span></p>
-				<select class="ml-3 form-control" name="caweb_vip_site_cache_url" required="">
-								<option value="1">localhost:8888</option>
-								</select>
+				<select class="ml-3 form-control" name="caweb_vip_site_cache_url" required>
+					<?php foreach( $sites as $site): ?>
+					<option value="<?php print esc_attr($site->blog_id); ?>"><?php print esc_url($site->guid); ?></option>
+					<?php endforeach; ?>
+				</select>
 			</div>
 		</div>
 		<div class="form-row">
@@ -191,16 +203,19 @@ function caweb_vip_save_plugin_settings() {
 	wp_verify_nonce( sanitize_key( $_POST['caweb_vip_settings_nonce'] ), 'caweb_vip_settings' );
 
 	$page   = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
-	$notice = true;
+	$notice = false;
 
 	if ( $verified && ! empty( $page ) ) {
 		switch ( $page ) {
 			default:
+				$time   = isset( $_POST['caweb_vip_session_time'] ) ? sanitize_text_field( wp_unslash( $_POST['caweb_vip_session_time'] ) ) : '';
+			
+				update_site_option('caweb_vip_session_time', $time);
 				break;
 		}
 	}
 
-	caweb_vip_mime_option_notices( true );
+	caweb_vip_mime_option_notices( $notice );
 
 }
 

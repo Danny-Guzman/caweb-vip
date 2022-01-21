@@ -41,6 +41,12 @@ function caweb_vip_the_content( $output ) {
  * @return int
  */
 function caweb_vip_auth_cookie_expiration( $length, $user_id, $remember ) {
-	// 60 seconds * 30 mins
-	return 60 * 30;
+	$session = get_site_option('caweb_vip_session_time', '');
+
+	if( ! empty( $session ) ){
+		$length = 60 * ((int) $session);
+	}
+	
+	return $length;
+
 }
