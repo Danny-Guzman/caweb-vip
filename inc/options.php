@@ -112,7 +112,7 @@ function caweb_vip_display_cache_settings() {
 	if( is_multisite() ){
 		$sites = get_sites();
 	}else{
-		$sites = array((object)array( 'blog_id' => 1, 'guid' => get_site_url()));
+		$sites = array((object)array( 'blog_id' => 1, 'domain' => get_site_url()));
 	}
 
 ?>
@@ -166,7 +166,7 @@ function caweb_vip_display_cache_settings() {
 				<p class="mb-0 ml-3"><span class="font-weight-bold">Site</span> <span class="text-danger">*</span></p>
 				<select class="ml-3 form-control" name="caweb_vip_site_cache_url" required>
 					<?php foreach( $sites as $site): ?>
-					<option value="<?php print esc_attr($site->blog_id); ?>"><?php print esc_url($site->guid); ?></option>
+					<option value="<?php print esc_attr($site->blog_id); ?>"><?php print esc_url($site->domain); ?></option>
 					<?php endforeach; ?>
 				</select>
 			</div>
