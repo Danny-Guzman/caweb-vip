@@ -41,7 +41,7 @@ function caweb_vip_plugin_options() {
 
 	$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : 'caweb-vip';
 
-	$hide_save = in_array( $page, array('cache-settings'), true ) ? ' invisible' : '';
+	$hide_save = in_array( $page, array( 'cache-settings' ), true ) ? ' invisible' : '';
 
 	$user_color = caweb_vip_get_user_color()->colors[2];
 
@@ -87,8 +87,8 @@ function caweb_vip_plugin_options() {
  * @return void
  */
 function caweb_vip_display_general() {
-	$session = get_site_option('caweb_vip_session_time', '');
-	
+	$session = get_site_option( 'caweb_vip_session_time', '' );
+
 	?>
 	<div class="p-2 mb-2 border-bottom border-secondary">
 		<div class="form-row">
@@ -109,13 +109,18 @@ function caweb_vip_display_general() {
  * @return void
  */
 function caweb_vip_display_cache_settings() {
-	if( is_multisite() ){
+	if ( is_multisite() ) {
 		$sites = get_sites();
-	}else{
-		$sites = array((object)array( 'blog_id' => 1, 'domain' => get_site_url()));
+	} else {
+		$sites = array(
+			(object) array(
+				'blog_id' => 1,
+				'domain'  => get_site_url(),
+			),
+		);
 	}
 
-?>
+	?>
 <div class="p-2 mb-2 border-bottom border-secondary">
 		<div class="form-row">
 			<div class="form-group">
@@ -165,8 +170,8 @@ function caweb_vip_display_cache_settings() {
 				<p class="mb-0">1) Select a site.</p>
 				<p class="mb-0 ml-3"><span class="font-weight-bold">Site</span> <span class="text-danger">*</span></p>
 				<select class="ml-3 form-control" name="caweb_vip_site_cache_url" required>
-					<?php foreach( $sites as $site): ?>
-					<option value="<?php print esc_attr($site->blog_id); ?>"><?php print esc_url($site->domain); ?></option>
+					<?php foreach ( $sites as $site ) : ?>
+					<option value="<?php print esc_attr( $site->blog_id ); ?>"><?php print esc_url( $site->domain ); ?></option>
 					<?php endforeach; ?>
 				</select>
 			</div>
@@ -208,9 +213,9 @@ function caweb_vip_save_plugin_settings() {
 	if ( $verified && ! empty( $page ) ) {
 		switch ( $page ) {
 			default:
-				$time   = isset( $_POST['caweb_vip_session_time'] ) ? sanitize_text_field( wp_unslash( $_POST['caweb_vip_session_time'] ) ) : '';
-			
-				update_site_option('caweb_vip_session_time', $time);
+				$time = isset( $_POST['caweb_vip_session_time'] ) ? sanitize_text_field( wp_unslash( $_POST['caweb_vip_session_time'] ) ) : '';
+
+				update_site_option( 'caweb_vip_session_time', $time );
 				break;
 		}
 	}

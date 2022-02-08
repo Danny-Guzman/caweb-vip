@@ -6,7 +6,7 @@
  */
 
 /* WP Filters */
-add_filter( 'the_content', 'caweb_vip_the_content', 10 );
+add_filter( 'the_content', 'caweb_vip_the_content', 99999 );
 add_filter( 'auth_cookie_expiration', 'caweb_vip_auth_cookie_expiration', 10, 3 );
 
 /**
@@ -16,17 +16,24 @@ add_filter( 'auth_cookie_expiration', 'caweb_vip_auth_cookie_expiration', 10, 3 
  * @return string
  */
 function caweb_vip_the_content( $output ) {
-	preg_match_all( '/src="([\w\S]*)"/', $output, $srcs );
+	// Regex match src and document href links.
+	preg_match_all( '/src="[^"]*"|href="[^"]*\.(doc|docx|xls|xlsx|ppt|pptx|pdf|)"/', $output, $srcs );
 
 	if ( ! empty( $srcs ) ) {
-		$new_srcs = array_map(
-			function( $src ) {
-				return "$src?version=" . uniqid();
-			},
-			$srcs[1]
-		);
+		$new_srcs = array();
 
-		$output = str_replace( $srcs[1], $new_srcs, $output );
+		// iterate thru srcs.
+		foreach ( $srcs[0] as $src ) {
+			// remove the last double quote.
+			$src = substr( $src, 0, strlen( $src ) - 1 );
+
+			// if there are no URL params then use ? otherwise &.
+			$src .= false === strpos( $src, '?' ) ? '?' : '&';
+
+			$new_srcs[] = sprintf( '%1$sversion=%2$s"', $src, uniqid() );
+		}
+
+		$output = str_replace( $srcs[0], $new_srcs, $output );
 	}
 
 	return $output;
@@ -41,12 +48,12 @@ function caweb_vip_the_content( $output ) {
  * @return int
  */
 function caweb_vip_auth_cookie_expiration( $length, $user_id, $remember ) {
-	$session = get_site_option('caweb_vip_session_time', '');
+	$session = get_site_option( 'caweb_vip_session_time', '' );
 
-	if( ! empty( $session ) ){
-		$length = 60 * ((int) $session);
+	if ( ! empty( $session ) ) {
+		$length = 60 * ( (int) $session );
 	}
-	
+
 	return $length;
 
 }
