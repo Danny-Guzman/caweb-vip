@@ -8,6 +8,7 @@
 /* WP Filters */
 add_filter( 'the_content', 'caweb_vip_the_content', 99999 );
 add_filter( 'auth_cookie_expiration', 'caweb_vip_auth_cookie_expiration', 10, 3 );
+add_filter( 'css_do_concat', 'caweb_vip_css_do_concat', 10, 2 );
 
 /**
  * Filters the post content adding a version query variable to any src attributes.
@@ -56,4 +57,20 @@ function caweb_vip_auth_cookie_expiration( $length, $user_id, $remember ) {
 
 	return $length;
 
+}
+
+/**
+ * Excludes the Disable Comments style sheet from the WPVIP concatenation script.
+ *
+ * @link https://docs.wpvip.com/technical-references/vip-platform/file-concatenation-and-minification/
+ *
+ * @param  bool   $do_concat Whether to concat or not.
+ * @param  string $handle Script/Style file handle.
+ * @return bool
+ */
+function caweb_vip_css_do_concat( $do_concat, $handle ) {
+	if ( 'disable-comments-style' === $handle ) {
+		return false;
+	}
+	return $do_concat;
 }
