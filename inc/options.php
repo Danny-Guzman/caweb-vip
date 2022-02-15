@@ -18,7 +18,6 @@ function caweb_vip_plugin_menu() {
 	$cap = is_multisite() ? 'manage_network_options' : 'manage_options';
 
 	add_menu_page( 'CAWeb VIP', 'CAWeb VIP', $cap, 'caweb-vip', 'caweb_vip_plugin_options', CAWEB_VIP_PLUGIN_URL . 'logo.png' );
-	add_submenu_page( 'caweb-vip', 'CAWeb VIP', 'Cache', $cap, 'cache-settings', 'caweb_vip_plugin_options' );
 
 }
 
@@ -41,7 +40,7 @@ function caweb_vip_plugin_options() {
 
 	$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : 'caweb-vip';
 
-	$hide_save = in_array( $page, array( 'cache-settings' ), true ) ? ' invisible' : '';
+	$hide_save = in_array( $page, array( 'caweb-vip' ), true ) ? ' invisible' : '';
 
 	$user_color = caweb_vip_get_user_color()->colors[2];
 
@@ -87,28 +86,6 @@ function caweb_vip_plugin_options() {
  * @return void
  */
 function caweb_vip_display_general() {
-	$session = get_site_option( 'caweb_vip_session_time', '' );
-
-	?>
-	<div class="p-2 mb-2 border-bottom border-secondary">
-		<div class="form-row">
-			<div class="form-group col-sm-12">
-				<h4 class="mb-0 d-inline">Session Timeout</h4>
-				<input type="text" class="form-control-sm" name="caweb_vip_session_time" required value="<?php print esc_attr( $session ); ?>">
-				<small class="text-muted d-block">Enter time in minutes</small>
-			</div>
-		</div>
-	</div>
-
-	<?php
-}
-
-/**
- * Display Cache Setting.
- *
- * @return void
- */
-function caweb_vip_display_cache_settings() {
 	if ( is_multisite() ) {
 		$sites = get_sites();
 	} else {
@@ -213,15 +190,11 @@ function caweb_vip_save_plugin_settings() {
 	if ( $verified && ! empty( $page ) ) {
 		switch ( $page ) {
 			default:
-				$time = isset( $_POST['caweb_vip_session_time'] ) ? sanitize_text_field( wp_unslash( $_POST['caweb_vip_session_time'] ) ) : '';
-
-				update_site_option( 'caweb_vip_session_time', $time );
 				break;
 		}
 	}
 
-	caweb_vip_mime_option_notices( $notice );
-
+	// caweb_vip_mime_option_notices( $notice ).
 }
 
 /**

@@ -7,7 +7,6 @@
 
 /* WP Filters */
 add_filter( 'the_content', 'caweb_vip_the_content', 99999 );
-add_filter( 'auth_cookie_expiration', 'caweb_vip_auth_cookie_expiration', 10, 3 );
 add_filter( 'css_do_concat', 'caweb_vip_css_do_concat', 10, 2 );
 
 /**
@@ -38,25 +37,6 @@ function caweb_vip_the_content( $output ) {
 	}
 
 	return $output;
-}
-
-/**
- * Filters the duration of the authentication cookie expiration period.
- *
- * @param  int  $length Duration of the expiration period in seconds.
- * @param  int  $user_id User ID.
- * @param  bool $remember Whether to remember the user login. Default false.
- * @return int
- */
-function caweb_vip_auth_cookie_expiration( $length, $user_id, $remember ) {
-	$session = get_site_option( 'caweb_vip_session_time', '' );
-
-	if ( ! empty( $session ) ) {
-		$length = 60 * ( (int) $session );
-	}
-
-	return $length;
-
 }
 
 /**
