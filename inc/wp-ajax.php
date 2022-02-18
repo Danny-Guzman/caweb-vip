@@ -27,11 +27,11 @@ function caweb_vip_clear_cache() {
 		$function = 'php' === $type ? 'wpcom_vip_purge_edge_cache_for_post' : 'wpcom_vip_purge_edge_cache_for_url';
 
 		if ( function_exists( $function ) ) {
-			call_user_func( $function, $url );
+			$result = call_user_func( $function, $url );
 		}
 	}
 
-	wp_send_json( true );
+	wp_send_json( $result );
 	wp_die(); // this is required to terminate immediately and return a proper response.
 }
 
@@ -64,7 +64,7 @@ function caweb_vip_clear_all_cache() {
 			$function = 'attachment' === $post->post_type ? 'wpcom_vip_purge_edge_cache_for_url' : 'wpcom_vip_purge_edge_cache_for_post';
 
 			if ( function_exists( $function ) ) {
-				call_user_func( $function, $post->guid );
+				$result = call_user_func( $function, $post->guid );
 			}
 		}
 
@@ -73,6 +73,6 @@ function caweb_vip_clear_all_cache() {
 		}
 	}
 
-	wp_send_json( true );
+	wp_send_json( $result );
 	wp_die(); // this is required to terminate immediately and return a proper response.
 }
