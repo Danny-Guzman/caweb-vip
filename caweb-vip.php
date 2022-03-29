@@ -5,7 +5,7 @@
  * Description: Resolves several WPVIP Environment issues for the CAWebPublishing Service
  * Author: California Department of Technology
  * Author URI: "https://github.com/Danny-Guzman"
- * Version: 1.0.0
+ * Version: 1.0.1
  * Network: true
  *
  * @package CAWeb VIP
@@ -20,9 +20,18 @@ add_action( 'admin_enqueue_scripts', 'caweb_vip_enqueue_scripts_styles' );
 add_action( 'admin_head', 'caweb_vip_admin_head', 999);
 add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
 
-// if the VIP Go Geo Uniques plugin is active.
-if ( function_exists( 'wpcom_vip_load_plugin' ) ) {
-	// Load the VIP Go Geo Uniques plugin.
+// Check if needed functions exists - if not, require them
+if ( ! function_exists( 'get_plugins' ) || ! function_exists( 'is_plugin_active' ) ) {
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
+}
+
+$installed_plugins = get_plugins();
+$vip_geo_slug = 'vip-go-geo-uniques';
+
+// if the VIP Go Geo Uniques plugin is installed.
+if ( function_exists( 'wpcom_vip_load_plugin' ) && array_key_exists( "$vip_geo_slug/$vip_geo_slug.php", $installed_plugins ) || in_array("$vip_geo_slug/$vip_geo_slug.php", $installed_plugins, true ) ){
+
+// Load the VIP Go Geo Uniques plugin.
 	wpcom_vip_load_plugin( 'vip-go-geo-uniques' );
 
 	// Configure the VIP Go Geo Uniques plugin.
@@ -64,7 +73,7 @@ function caweb_vip_init() {
 
 		if ( function_exists( 'vip_geo_get_country_code' ) ) {
 			// if user logged in from anywhere other than the default region.
-			if ( $region_lock && 'US' !== vip_geo_get_country_code() ) {
+			if ( $region_lock && ! VIP_Go_Geo_Uniques::is_valid_location( vip_geo_get_country_code() ) ) {
 				wp_logout();
 				wp_safe_redirect( get_site_url() );
 				exit;
