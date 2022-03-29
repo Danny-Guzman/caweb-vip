@@ -62,7 +62,7 @@ if ( ! class_exists( 'CAWeb_VIP_Plugin_Update' ) ) {
 		 * @param string $plugin_slug Plugin slug name.
 		 */
 		public function __construct( $plugin_slug ) {
-			$plugin_data = get_plugin_data( sprintf( '%1$s/%2$s/%2$s.php', WP_PLUGIN_DIR, $plugin_slug ) );
+			$plugin_data = get_plugin_data( sprintf( '%1$s%2$s.php', CAWEB_VIP_PLUGIN_DIR, $plugin_slug ) );
 
 			// Set the class public variables.
 			$this->current_version = $plugin_data['Version'];
@@ -291,5 +291,5 @@ if ( ! class_exists( 'CAWeb_VIP_Plugin_Update' ) ) {
 	}
 }
 
-new CAWeb_VIP_Plugin_Update( plugin_basename( plugin_dir_path( __DIR__ ) ) );
+new CAWeb_VIP_Plugin_Update( basename( plugin_dir_path( __DIR__ ) ) );
 

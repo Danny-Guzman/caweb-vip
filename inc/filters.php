@@ -6,8 +6,13 @@
  */
 
 /* WP Filters */
-add_filter( 'the_content', 'caweb_vip_the_content', 99999 );
-add_filter( 'css_do_concat', 'caweb_vip_css_do_concat', 10, 2 );
+add_filter( 'the_content', 'caweb_vip_the_content', 10 );
+add_filter( 'wpforms_upload_root', 'caweb_vip_upload_root', 10, 1 );
+
+// disable JS & CSS concatenation
+// https://cdtp2.wordpress.com/2022/03/15/divi-builder-new-version-does-not-load/
+add_filter( 'js_do_concat', '__return_false' );
+add_filter( 'css_do_concat', '__return_false' );
 
 /**
  * Filters the post content adding a version query variable to any src attributes.
@@ -16,41 +21,36 @@ add_filter( 'css_do_concat', 'caweb_vip_css_do_concat', 10, 2 );
  * @return string
  */
 function caweb_vip_the_content( $output ) {
-	// Regex match src and document href links.
-	preg_match_all( '/src="[^"]*"|href="[^"]*\.(doc|docx|xls|xlsx|ppt|pptx|pdf|)"/', $output, $srcs );
+	preg_match_all( '/src="([\w\S]*)"/', $output, $srcs );
 
 	if ( ! empty( $srcs ) ) {
-		$new_srcs = array();
+		$new_srcs = array_map(
+			function( $src ) {
+				return "$src?version=" . uniqid();
+			},
+			$srcs[1]
+		);
 
-		// iterate thru srcs.
-		foreach ( $srcs[0] as $src ) {
-			// remove the last double quote.
-			$src = substr( $src, 0, strlen( $src ) - 1 );
-
-			// if there are no URL params then use ? otherwise &.
-			$src .= false === strpos( $src, '?' ) ? '?' : '&';
-
-			$new_srcs[] = sprintf( '%1$sversion=%2$s"', $src, uniqid() );
-		}
-
-		$output = str_replace( $srcs[0], $new_srcs, $output );
+		$output = str_replace( $srcs[1], $new_srcs, $output );
 	}
 
 	return $output;
 }
 
 /**
- * Excludes the Disable Comments style sheet from the WPVIP concatenation script.
+ * Change the path where file uploads are stored in WPForms.
  *
- * @link https://docs.wpvip.com/technical-references/vip-platform/file-concatenation-and-minification/
+ * @link    https://wpforms.com/developers/wpforms_upload_root/
  *
- * @param  bool   $do_concat Whether to concat or not.
- * @param  string $handle Script/Style file handle.
- * @return bool
+ * @param   string $path  root path of where file uploads will be stored.
+ *
+ * @return  string
  */
-function caweb_vip_css_do_concat( $do_concat, $handle ) {
-	if ( 'disable-comments-style' === $handle ) {
-		return false;
-	}
-	return $do_concat;
+function caweb_vip_upload_root( $path ) {
+
+	// Define the path for your file uploads here.
+	$path = wp_get_upload_dir()['basedir'] . '/wpforms';
+
+	return $path;
+
 }

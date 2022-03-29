@@ -5,7 +5,8 @@
  * @package CAWeb VIP
  */
 
-add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', 'caweb_vip_plugin_menu' );
+add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', 'caweb_vip_plugin_menu', 15 );
+add_action( 'admin_menu', 'caweb_vip_remove_admin_menus', 999 );
 
 /**
  * CAWeb VIP Administration Menu Setup
@@ -20,6 +21,23 @@ function caweb_vip_plugin_menu() {
 	add_menu_page( 'CAWeb VIP', 'CAWeb VIP', $cap, 'caweb-vip', 'caweb_vip_plugin_options', CAWEB_VIP_PLUGIN_URL . 'logo.png' );
 
 }
+
+/**
+ * CAWeb VIP Administration Menu Removal Setup
+ * Fires before the administration menu loads in the admin.
+ *
+ * @link https://developer.wordpress.org/reference/hooks/admin_menu/
+ * @return void
+ */
+function caweb_vip_remove_admin_menus() {
+
+	/* If Multisite instance & user is not a Network Admin */
+	if ( is_multisite() && ! current_user_can( 'manage_network_options' ) ) {
+		// Remove JetPack.
+		remove_menu_page( 'jetpack' );
+	}
+}
+
 
 /**
  * Setup CAWeb VIP Options

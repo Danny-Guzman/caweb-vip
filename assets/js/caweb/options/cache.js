@@ -27,12 +27,6 @@ jQuery(document).ready(function($) {
 	  
 		jQuery.post(ajaxurl, data, function(response) {
 			$(spinner).addClass('d-none');
-			
-			if( true === response ){
-				alert( "Cache successfully cleared.");
-			}else{
-				alert( "Cache could not be cleared.");
-			}
 		});
 	});
 
@@ -57,12 +51,7 @@ jQuery(document).ready(function($) {
 	  
 		jQuery.post(ajaxurl, data, function(response) {
 			$(spinner).addClass('d-none');
-
-			if( true === response ){
-				alert( "Cache successfully cleared.");
-			}else{
-				alert( "Cache could not be cleared.");
-			}
+			console.log(response);
 		});
 	});
 
