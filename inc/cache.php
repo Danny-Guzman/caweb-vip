@@ -6,8 +6,23 @@
  */
 
 add_action( 'update_option_caweb_external_css', 'caweb_vip_clear_caweb_external_css_cache', 10, 3 );
-
 add_action( 'update_option_caweb_external_js', 'caweb_vip_clear_caweb_external_js_cache', 10, 3 );
+add_action( 'wp', 'caweb_vip_cache_maxage' );
+
+
+/**
+ * Changes the WPVIP TTL 
+ * 
+ * Fires once the WordPress environment has been set up.
+ * 
+ * @param  WP $wp Current WordPress environment instance (passed by reference).
+ * @return void
+ */
+function caweb_vip_cache_maxage( $wp ) {
+	$caweb_vip_ttl = get_site_option('caweb_vip_cache_maxage', '');
+
+    header( 'Cache-Control: max-age=' . ($caweb_vip_ttl * 60) );
+}
 
 /**
  * Clears the cache for CAWeb Custom CSS files option after its value is updated.

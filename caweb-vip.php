@@ -20,25 +20,15 @@ add_action( 'admin_enqueue_scripts', 'caweb_vip_enqueue_scripts_styles' );
 add_action( 'admin_head', 'caweb_vip_admin_head', 999);
 add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
 
-// Check if needed functions exists - if not, require them
-if ( ! function_exists( 'get_plugins' ) || ! function_exists( 'is_plugin_active' ) ) {
-    require_once ABSPATH . 'wp-admin/includes/plugin.php';
-}
+add_filter( 'et_cache_wpfs_credentials', 'caweb_vip_wpfs_credentials');
 
-$installed_plugins = get_plugins();
-$vip_geo_slug = 'vip-go-geo-uniques';
-
-// if the VIP Go Geo Uniques plugin is installed.
-if ( function_exists( 'wpcom_vip_load_plugin' ) && array_key_exists( "$vip_geo_slug/$vip_geo_slug.php", $installed_plugins ) || in_array("$vip_geo_slug/$vip_geo_slug.php", $installed_plugins, true ) ){
-
-// Load the VIP Go Geo Uniques plugin.
-	wpcom_vip_load_plugin( 'vip-go-geo-uniques' );
-
-	// Configure the VIP Go Geo Uniques plugin.
-	if ( class_exists( 'VIP_Go_Geo_Uniques' ) ) {
-		VIP_Go_Geo_Uniques::set_default_location( 'USA' );
-		VIP_Go_Geo_Uniques::add_location( 'US' );
-	}
+/**
+ * Returns credentials to interact with wp_filesystem
+ *
+ * @return bool|array
+ */
+function caweb_vip_wpfs_credentials(){
+	return request_filesystem_credentials( site_url() );
 }
 
 // Disable non-mandatory Jetpack Modules.
@@ -68,17 +58,21 @@ function caweb_vip_after_setup_theme() {
 function caweb_vip_init() {
 	global $pagenow;
 
+	// Allow all VIP Support requests through their proxy for global support.
+
 	if ( 'wp-login.php' === $pagenow ) {
 		$region_lock = get_site_option( 'caweb_netadmin_default_region', true );
+		$country_code = isset( $_SERVER['GEOIP_COUNTRY_CODE'] ) && ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ? $_SERVER['GEOIP_COUNTRY_CODE']  : '';
+	    $is_vip = function_exists( 'is_proxied_request' ) && is_proxied_request();
 
-		if ( function_exists( 'vip_geo_get_country_code' ) ) {
-			// if user logged in from anywhere other than the default region.
-			if ( $region_lock && ! VIP_Go_Geo_Uniques::is_valid_location( vip_geo_get_country_code() ) ) {
-				wp_logout();
-				wp_safe_redirect( get_site_url() );
-				exit;
-			}
+		// if user logged in from anywhere other than the US.
+		// if user is not WPVIP
+		if ( ! $is_vip && $region_lock && 'US' !== $country_code ) {
+			wp_logout();
+			wp_safe_redirect( get_site_url() );
+			exit;
 		}
+
 	}
 
 	/* Include CAWeb VIP Functionality */
@@ -160,11 +154,15 @@ function caweb_vip_disable_jetpack_modules( $modules ) {
  * @return void
  */
 function caweb_vip_admin_head(){
-		?>
+	if ( ! is_super_admin() ) {
+		remove_all_actions( 'network_admin_notices' );
+	}
+	
+	?>
 		<style>
 			div#jetpack_summary_widget.postbox{ display: none; }
 		</style>
-		<?php
+	<?php
 	
 }
 
