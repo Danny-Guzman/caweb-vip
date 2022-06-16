@@ -75,22 +75,20 @@ function caweb_vip_add_cache_bust_query_for_media_replace( $url ) {
  * Change the path where file uploads are stored in WPForms.
  *
  * @link    https://wpforms.com/developers/wpforms_upload_root/
- *
  * @param   string $path  root path of where file uploads will be stored.
- *
  * @return  string
  */
 function caweb_vip_upload_root( $path ) {
 
 	// if WPForms is doing an export, assume ajax request
 	if( wp_doing_ajax() ){
-		$path = get_temp_dir();
 	// otherwise assume WPForms submission
 	}else{
 		// Define the path for your file uploads here.
-		$path = wp_get_upload_dir()['basedir'] . '/wpforms';
+		// $path = wp_get_upload_dir()['basedir'] . '/wpforms';
 	}
-	
+	$path = get_temp_dir();
+
 	return $path;
 
 }
