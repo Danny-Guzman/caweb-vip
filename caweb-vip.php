@@ -5,7 +5,7 @@
  * Description: Resolves several WPVIP Environment issues for the CAWebPublishing Service
  * Author: California Department of Technology
  * Author URI: "https://github.com/Danny-Guzman"
- * Version: 1.0.1
+ * Version: 1.0.2
  * Network: true
  *
  * @package CAWeb VIP
@@ -156,6 +156,8 @@ function caweb_vip_disable_jetpack_modules( $modules ) {
 function caweb_vip_admin_head(){
 	if ( ! is_super_admin() ) {
 		remove_all_actions( 'network_admin_notices' );
+		remove_all_actions( 'user_admin_notices' );
+		remove_all_actions( 'admin_notices' );
 	}
 	
 	?>
