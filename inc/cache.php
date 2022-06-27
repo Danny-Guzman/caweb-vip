@@ -19,7 +19,7 @@ add_action( 'wp', 'caweb_vip_cache_maxage' );
  * @return void
  */
 function caweb_vip_cache_maxage( $wp ) {
-	$caweb_vip_ttl = get_site_option('caweb_vip_cache_maxage', '');
+	$caweb_vip_ttl = get_site_option('caweb_vip_cache_maxage', 30);
 
     header( 'Cache-Control: max-age=' . ($caweb_vip_ttl * 60) );
 }
