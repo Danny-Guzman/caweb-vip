@@ -80,7 +80,16 @@ function caweb_vip_the_content( $output ) {
  * @return void
  */
 function caweb_vip_add_cache_bust_query_for_media_replace( $url ) {
-	return add_query_arg( 'emrc', caweb_vip_get_attachment_version_number( $url ),  $url);
+	$url_to_bust = is_array( $url ) ? $url[0] : $url;
+
+    $url_busted = add_query_arg( 'emrc', caweb_vip_get_attachment_version_number( $url_to_bust ),  $url_to_bust);
+
+	if ( is_array( $url ) ) {
+	    $url[0] = $url_busted;
+    	return $url;
+    } else {
+		return $url_busted;
+    }
 }
 
 /**
