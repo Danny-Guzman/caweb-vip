@@ -93,6 +93,14 @@ function caweb_vip_init() {
  */
 function caweb_vip_admin_init() {
 	require_once CAWEB_VIP_PLUGIN_DIR . 'core/class-caweb-vip-plugin-update.php';
+
+	if ( ! is_super_admin() ) {
+		remove_all_actions( 'network_admin_notices' );
+		remove_all_actions( 'user_admin_notices' );
+		remove_all_actions( 'admin_notices' );
+		//remove_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
+	}
+
 }
 
 /**
@@ -154,11 +162,6 @@ function caweb_vip_disable_jetpack_modules( $modules ) {
  * @return void
  */
 function caweb_vip_admin_head(){
-	if ( ! is_super_admin() ) {
-		remove_all_actions( 'network_admin_notices' );
-		remove_all_actions( 'user_admin_notices' );
-		remove_all_actions( 'admin_notices' );
-	}
 	
 	?>
 		<style>
