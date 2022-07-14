@@ -98,7 +98,8 @@ function caweb_vip_admin_init() {
 		remove_all_actions( 'network_admin_notices' );
 		remove_all_actions( 'user_admin_notices' );
 		remove_all_actions( 'admin_notices' );
-		//remove_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
+
+		add_action( 'admin_notices', 'wpcom_vip_two_factor_admin_notice' );
 	}
 
 }
