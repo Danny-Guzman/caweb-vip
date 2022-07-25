@@ -96,10 +96,14 @@ function caweb_vip_admin_init() {
 
 	if ( ! is_super_admin() ) {
 		remove_all_actions( 'network_admin_notices' );
-		remove_all_actions( 'user_admin_notices' );
+	    remove_all_actions( 'user_admin_notices' );
 		remove_all_actions( 'admin_notices' );
 
 		add_action( 'admin_notices', 'wpcom_vip_two_factor_admin_notice' );
+
+		/*if ( '1' == get_option( 'blog_public' ) ) {
+			add_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
+		}*/
 	}
 
 }
@@ -163,7 +167,6 @@ function caweb_vip_disable_jetpack_modules( $modules ) {
  * @return void
  */
 function caweb_vip_admin_head(){
-	
 	?>
 		<style>
 			div#jetpack_summary_widget.postbox{ display: none; }
