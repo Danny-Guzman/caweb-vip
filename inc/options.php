@@ -19,6 +19,7 @@ function caweb_vip_plugin_menu() {
 	$cap = is_multisite() ? 'manage_network_options' : 'manage_options';
 
 	add_menu_page( 'CAWeb VIP', 'CAWeb VIP', $cap, 'caweb-vip', 'caweb_vip_plugin_options', CAWEB_VIP_PLUGIN_URL . 'logo.png' );
+	add_submenu_page( 'caweb-vip', 'CAWeb VIP', 'Cache', $cap, 'caweb-vip-cache', 'caweb_vip_plugin_options' );
 
 }
 
@@ -58,7 +59,7 @@ function caweb_vip_plugin_options() {
 
 	$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : 'caweb-vip';
 
-	$hide_save = in_array( $page, array( 'caweb-vip' ), true ) ? ' invisible' : '';
+	$hide_save = in_array( $page, array( 'caweb-vip-cache' ), true ) ? ' invisible' : '';
 
 	$user_color = caweb_vip_get_user_color()->colors[2];
 
@@ -104,6 +105,33 @@ function caweb_vip_plugin_options() {
  * @return void
  */
 function caweb_vip_display_general() {
+	$caweb_vip_ttl = get_site_option('caweb_vip_cache_maxage', '');
+
+	?>
+	<div class="p-2 mb-2 border-bottom border-secondary">
+		<div class="form-row">
+			<div class="form-group">
+				<h2 class="d-inline">Enter TTL</h2>
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="form-group col-sm-12">
+				<p class="mb-0">1) Enter <strong>TTL</strong></p>
+				<p class="mb-0 ml-3"> 
+					<input type="number" name="caweb_vip_cache_maxage" placeholder="Minutes" value="<?php print esc_attr( $caweb_vip_ttl ); ?>">
+				</p>
+			</div>
+		</div>
+	</div>
+	<?php
+}
+
+/**
+ * Display General Settings for the current instance.
+ *
+ * @return void 
+ */
+function caweb_vip_display_caweb_vip_cache(){
 	if ( is_multisite() ) {
 		$sites = get_sites();
 	} else {
@@ -116,80 +144,80 @@ function caweb_vip_display_general() {
 	}
 
 	?>
-<div class="p-2 mb-2 border-bottom border-secondary">
-		<div class="form-row">
-			<div class="form-group">
-				<h2 class="d-inline">Purge By URL</h2>
+		<div class="p-2 mb-2 border-bottom border-secondary">
+			<div class="form-row">
+				<div class="form-group">
+					<h2 class="d-inline">Purge By URL</h2>
+				</div>
 			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-sm-12">
-				<p class="mb-0">1) Enter <strong>URL</strong> to be purged.</p>
-				<p class="mb-0 ml-3"><span class="font-weight-bold">URL: <span class="text-danger">*</span></span> 
-					<input type="text" class="form-control" name="caweb_vip_page_cache_url" placeholder="https://example.ca.gov/" required>
-				</p>
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+					<p class="mb-0">1) Enter <strong>URL</strong> to be purged.</p>
+					<p class="mb-0 ml-3"><span class="font-weight-bold">URL: <span class="text-danger">*</span></span> 
+						<input type="text" class="form-control" name="caweb_vip_page_cache_url" placeholder="https://example.ca.gov/" required>
+					</p>
+				</div>
 			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-sm-12">
-				<p class="mb-0">2) Select <strong>Cache Type</strong> <span class="text-danger">*</span></p>
-				<p class="mb-0 ml-3">
-					<label class="d-block" for="caweb_vip_page_cache_type_php">
-						<input type="radio" checked="" class="form-control" name="caweb_vip_page_cache_type" required id="caweb_vip_page_cache_type_php" value="php">
-						PHP
-					</label>
-					<label for="caweb_vip_page_cache_type_static">
-						<input type="radio" class="form-control" name="caweb_vip_page_cache_type" required id="caweb_vip_page_cache_type_static" value="static">
-						Static
-					</label>
-				</p>
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+					<p class="mb-0">2) Select <strong>Cache Type</strong> <span class="text-danger">*</span></p>
+					<p class="mb-0 ml-3">
+						<label class="d-block" for="caweb_vip_page_cache_type_php">
+							<input type="radio" checked="" class="form-control" name="caweb_vip_page_cache_type" required id="caweb_vip_page_cache_type_php" value="php">
+							PHP
+						</label>
+						<label for="caweb_vip_page_cache_type_static">
+							<input type="radio" class="form-control" name="caweb_vip_page_cache_type" required id="caweb_vip_page_cache_type_static" value="static">
+							Static
+						</label>
+					</p>
+				</div>
 			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-sm-12">
-				<input type="button" id="caweb-vip-purge-url" class="ml-3 btn btn-primary" value="Purge">
-				<div class="spinner-border d-none align-middle" role="status">
-					<span class="sr-only">Loading...</span>
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+					<input type="button" id="caweb-vip-purge-url" class="ml-3 btn btn-primary" value="Purge">
+					<div class="spinner-border d-none align-middle" role="status">
+						<span class="sr-only">Loading...</span>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="p-2 mb-2">
-		<div class="form-row">
-			<div class="form-group">
-				<h2 class="d-inline">Purge ALL Site Cache</h2>
+		<div class="p-2 mb-2">
+			<div class="form-row">
+				<div class="form-group">
+					<h2 class="d-inline">Purge ALL Site Cache</h2>
+				</div>
 			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-sm-12">
-				<p class="mb-0">1) Select a site.</p>
-				<p class="mb-0 ml-3"><span class="font-weight-bold">Site</span> <span class="text-danger">*</span></p>
-				<select class="ml-3 form-control" name="caweb_vip_site_cache_url" required>
-					<?php foreach ( $sites as $site ) : ?>
-					<option value="<?php print esc_attr( $site->blog_id ); ?>"><?php print esc_url( $site->domain ); ?></option>
-					<?php endforeach; ?>
-				</select>
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+					<p class="mb-0">1) Select a site.</p>
+					<p class="mb-0 ml-3"><span class="font-weight-bold">Site</span> <span class="text-danger">*</span></p>
+					<select class="ml-3 form-control" name="caweb_vip_site_cache_url" required>
+						<?php foreach ( $sites as $site ) : ?>
+						<option value="<?php print esc_attr( $site->blog_id ); ?>"><?php print esc_url( $site->domain ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</div>
 			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-sm-12">
-				<p class="mb-0 ml-3">
-					<label class="d-block" for="caweb_vip_site_cache_confirm">
-						<input type="checkbox" required="" class="form-control" name="caweb_vip_site_cache_confirm" id="caweb_vip_site_cache_confirm">
-						Acknowledgement. By checking this box I acknowledge that I am going to purge ALL cache objects for the site listed above. <span class="text-danger">*</span>
-					</label>
-				</p>
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+					<p class="mb-0 ml-3">
+						<label class="d-block" for="caweb_vip_site_cache_confirm">
+							<input type="checkbox" required="" class="form-control" name="caweb_vip_site_cache_confirm" id="caweb_vip_site_cache_confirm">
+							Acknowledgement. By checking this box I acknowledge that I am going to purge ALL cache objects for the site listed above. <span class="text-danger">*</span>
+						</label>
+					</p>
+				</div>
 			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-sm-12">
-				<input type="button" id="caweb-vip-purge-site" class="ml-3 btn btn-primary" value="Purge All">
-				<div class="spinner-border d-none align-middle" role="status">
-					<span class="sr-only">Loading...</span>
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+					<input type="button" id="caweb-vip-purge-site" class="ml-3 btn btn-primary" value="Purge All">
+					<div class="spinner-border d-none align-middle" role="status">
+						<span class="sr-only">Loading...</span>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 	<?php
 }
 
@@ -203,16 +231,21 @@ function caweb_vip_save_plugin_settings() {
 	wp_verify_nonce( sanitize_key( $_POST['caweb_vip_settings_nonce'] ), 'caweb_vip_settings' );
 
 	$page   = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+
+	$ttl   = isset( $_POST['caweb_vip_cache_maxage'] ) ? sanitize_text_field( wp_unslash( $_POST['caweb_vip_cache_maxage'] ) ) : '';
+	
 	$notice = false;
 
 	if ( $verified && ! empty( $page ) ) {
 		switch ( $page ) {
 			default:
-				break;
+			
+			update_site_option('caweb_vip_cache_maxage', $ttl);
+			break;
 		}
 	}
 
-	// caweb_vip_mime_option_notices( $notice ).
+	caweb_vip_mime_option_notices( $notice );
 }
 
 /**
