@@ -19,9 +19,12 @@ add_action( 'wp', 'caweb_vip_cache_maxage' );
  * @return void
  */
 function caweb_vip_cache_maxage( $wp ) {
-	$caweb_vip_ttl = get_site_option('caweb_vip_cache_maxage', 30);
+	$caweb_vip_ttl  = get_site_option('caweb_vip_cache_maxage', 30);
+    // $change_tll_on_this_template = is_singular() || is_page() || is_front_page() || is_home() || is_archive() || is_404();
 
-    header( 'Cache-Control: max-age=' . ($caweb_vip_ttl * 60) );
+    if ( ! is_user_logged_in() ){
+        header( 'Cache-Control: max-age=' . ($caweb_vip_ttl  * 60) );
+    }
 }
 
 /**

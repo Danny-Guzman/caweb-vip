@@ -35,10 +35,14 @@ function caweb_vip_remove_admin_menus() {
 	/* If Multisite instance & user is not a Network Admin */
 	if ( is_multisite() && ! current_user_can( 'manage_network_options' ) ) {
 		// Remove JetPack.
-		remove_menu_page( 'jetpack' );
+		remove_menu_page( 'jetpack');  
+
+		// Removes VIP's custom dashboard page to prevent admins from submitting support tickets to VIP
+		remove_menu_page( 'vip-dashboard' );
+		
 	}
 }
-
+	
 
 /**
  * Setup CAWeb VIP Options
