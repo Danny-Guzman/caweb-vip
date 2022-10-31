@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor configVersion="3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://www.phpdoc.org" xsi:noNamespaceSchemaLocation="https://docs.phpdoc.org/latest/phpdoc.xsd">
+    <paths>
+        <output>.docs</output>
+    </paths>
+    <title>CAWeb WPVIP Integration Plugin</title>
+    <version number="3.1.0">
+        <api>
+            <default-package-name>caweb-vip</default-package-name>
+            <source dsn=".">
+            </source>
+            <ignore>
+                <path>assets/**/*</path>
+                <path>core/**/*</path>
+                <path>css/**/*</path>
+                <path>js/**/*</path>
+                <path>node_modules/**/*</path>
+                <path>partials/**/*</path>
+                <path>vendor/**/*</path>
+            </ignore>
+        </api>
+    </version>
+    
+    <setting name="nav_menu" value="
+     WPVIP,gears,{Zendesk,gears,https://wordpressvip.zendesk.com/,Ticketing System},{New Relic,book,https://one.newrelic.com/,Logger}" />
+ 
+    <setting name="contact_url" value="https://caweb.cdt.ca.gov/contact-us/" />
+ 
+    <!-- State Template Settings -->
+    <setting name="colorscheme" value="santa barbara" />
+
+    <!-- Github Settings -->
+    <setting name="stable_version" value="#" />
+    <setting name="github_user" value="wpcomvip" />
+    <setting name="github_repo" value="vip-sites-ca-gov" />
+    <setting name="github_branch" value="main" />
+ 
+    <!-- WordPress.NamingConventions.PrefixAllGlobals Rule.
+      Multiple valid prefixes can be provided as a comma-delimited list. -->
+    <setting name="wp_prefixes" value="caweb_vip_" />
+      
+    <template name="vendor/caweb/phpdoc/" location="vendor/caweb/phpdoc/" />
+    <template name="." location="." />
+
+</phpdocumentor>

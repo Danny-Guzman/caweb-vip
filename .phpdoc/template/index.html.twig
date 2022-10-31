@@ -1,0 +1,90 @@
+{% extends "layout.html.twig" %}
+{% import "macros.twig" as macros %}
+
+{% set current_date = "now"|date("m/d/Y", 'America/Los_Angeles') %}
+
+{% block head %}
+<title>{{ project.name }} Documentation</title>
+{% endblock head %}
+
+
+{% set functions = [] %}
+{# iterate thru all project files #}
+{% for obj in project.files %}
+    {# iterate thru all file functions #}
+    {% for f in obj.functions|sort_asc %}
+        {# Save function information #}
+        {% set functions = functions|merge([f]) %}
+    {% endfor %}
+
+    {# iterate thru classes in the file  #}
+    {% for class in obj.classes %}
+        {# iterate thru class methods #}
+        {% for c in class.methods|sort_asc %}
+            {# Save function information #}
+            {% set functions = functions|merge([c]) %}
+        {% endfor %}
+    {% endfor %}    
+{% endfor %}
+
+{% block introduction %}
+<div class="offset-quarter">
+    <h1 class="mt-0 mb-1">Welcome to the CAWeb VIP Report</h1>
+    <div class="pl-0">
+        <p>In order for CAWeb to operate on this platform a completely separate plugin has to be maintained in order to resolve several issues with the environment.</p>
+    {% for function in functions|sort((a,b) => a.summary <=> b.summary ) %}
+    
+        {% if function.description is not empty %}
+            <div class="py-3 border-bottom border-info">
+                <h3 class="my-0">{{ function.summary }}</h3>
+                <p>{{ function.description|raw }}</p>
+
+                {# show zendesk tickets #}
+                {% if function.tags.zendesk|length %}
+                    {% for z in function.tags.zendesk %}
+                        {% set zendesk = z.__toString() %}
+                        {% set ticket = zendesk|split('/', 7)[6] %}
+
+                        {% if ticket is not empty %}
+                        <strong>Zendesk Ticket <a href="{{ zendesk }}" target="_blank">#{{ ticket }}</a></strong> 
+                        {% else %}
+                        <strong>{{ zendesk }}</strong>
+                        {% endif %}
+                        <br/>
+                    {% endfor %}
+                {% endif %}
+
+                {# show p2 discussions #}
+                {% if function.tags.p2|length %}
+                    {% for p in function.tags.p2 %}
+                        {% set p2 = p.__toString() %}
+
+                        <strong>P2 Discussion <a href="{{ p2 }}" target="_blank">{{ p2 }}</a></strong><br/>
+                    {% endfor %}
+                {% endif %}
+
+                {# show azure tickets #}
+                {% if function.tags.azure|length %}
+                    {% for p in function.tags.azure %}
+                        {% set azure = p.__toString() %}
+                        {% set ticket = azure|split('/', 7)[6] %}
+
+                        <strong>Azure DevOps Ticket <a href="{{ azure }}" target="_blank">#{{ ticket }}</a></strong><br/>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    </div>
+</div>
+
+{% endblock introduction %}
+
+{% block table_of_contents %}
+{% endblock table_of_contents %}
+
+{% block body %}
+<div class="offset-quarter">
+</div>
+{% endblock body %}

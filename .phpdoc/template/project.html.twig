@@ -1,0 +1,33 @@
+{% extends "layout.html.twig" %}
+{% import "macros.twig" as macros %}
+
+{% block head %}
+<title>{{ project.name }} Project Breakdown</title>
+{% endblock head %}
+
+{% block introduction %}
+<h1>Project Breakdown</h1>
+{% endblock introduction %}
+
+{% block table_of_contents %}
+{% endblock table_of_contents %}
+
+{% block body %}
+
+<div class="offset-quarter">
+    <p><strong>env/</strong> - Directory with all environment variable files.</p>
+    <p><strong>wordpress/</strong> - Directory with different files/directories utilized by the this project.</p>
+    <p><strong>docker-compose.yml</strong> - YAML file configuring the 3 services.</p>
+    <ul>
+        <li class="mb-3">mariadb - Database Service, utilizes the <a href="https://hub.docker.com/_/mariadb" target="_blank">Official MariaDB Docker Image</a>
+            <img class="d-block" src="{{ path('/imgs/') }}mariadb.png" />
+        </li>
+        <li class="mb-3">phpMyAdmin - Administration tool for the database, utilizes the <a href="https://hub.docker.com/r/phpmyadmin/phpmyadmin" target="_blank">Official phpMyAdmin Docker Image</a>
+            <img class="d-block" src="{{ path('/imgs/') }}phpmyadmin.png" />
+        </li>
+        <li class="mb-3">site - CAWeb WordPress Instance, utilizes the <a href="{{ project.settings.custom.docker_img_url }}" target="_blank">Official CAWebPublishing CAWeb Docker Image</a>
+            <img class="d-block" src="{{ path('/imgs/') }}site.png" />
+        </li>
+    </ul>
+</div>
+{% endblock body %}

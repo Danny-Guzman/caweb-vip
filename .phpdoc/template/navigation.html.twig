@@ -1,0 +1,96 @@
+{% extends "layout.html.twig" %}
+{% import "macros.twig" as macros %}
+
+{% block head %}
+<title>{{ project.name }} Create Navigations</title>
+{% endblock head %}
+
+{% block introduction %}
+<div class="offset-quarter">
+    <h1 class="my-0">Create Navigation Menu's</h1>
+    The CAWeb Theme allows for 2 different menus, a header and a footer menu. 
+    The footer menu does not allow for icons. 
+    There are 3 different CAWeb Navigation Menu Styles  
+    {{ macros.markup('`dropdown`') }},
+    {{ macros.markup('`megadropdown`') }},
+    {{ macros.markup('`singlelevel`') }}. 
+    <p class="mt-3">To create navigation menu's pages/posts must have been created using the 
+    <a href="{{ path('/') }}how-to.html#create_pages">Create Pages/Posts</a> method. When adding pages/posts ensure to list the full directory path starting with pages/<filename> or posts/<filename> respectively.
+    </p>
+</div>
+{% endblock introduction %}
+
+{% block table_of_contents %}
+{% endblock table_of_contents %}
+
+{% block body %}
+
+<div class="offset-quarter">
+    <div class="my-3">
+        <div>
+            <strong>Navigation Menu</strong> ( Edit the {{ macros.markup('`env/caweb.env`') }} file )
+            {% set desc = macros.search_obj_array(env_variables['caweb'], 'var', 'CAWEB_NAV_MENU_STYLE', 'desc') %}
+            <div>
+                {{ macros.markup(" \\- #{desc}", macros.terminal_command('CAWEB_NAV_MENU_STYLE') ) }}
+            </div>
+        </div>
+        <div class="mt-3">
+            <strong class="mt-3">Header Menu</strong> ( Edit the {{ macros.markup('`env/wp.env`') }} file )
+            {% set desc = macros.search_obj_array(env_variables['wordpress'], 'var', 'WP_HEADER_MENU_NAME', 'desc') %}
+            <div>
+                {{ macros.markup(" \\- #{desc}", macros.terminal_command('WP_HEADER_MENU_NAME') ) }}
+            </div>
+        </div>
+        <div class="mt-3">
+            {% set desc = macros.search_obj_array(env_variables['wordpress'], 'var', 'WP_HEADER_MENU', 'desc') %}
+            <div>
+                {{ macros.markup(" \\- #{desc}", macros.terminal_command('WP_HEADER_MENU') ) }}
+            </div>
+        </div>
+        <div class="mt-3">
+            {% set desc = macros.search_obj_array(env_variables['wordpress'], 'var', 'WP_HEADER_MENU_ICONS', 'desc') %}
+            <div>
+                {{ macros.markup(" \\- #{desc}", macros.terminal_command('WP_HEADER_MENU_ICONS') ) }}
+            </div>
+        </div>
+        <div class="mt-3">
+            <strong class="mt-3">Footer Menu</strong> ( Edit the {{ macros.markup('`env/wp.env`') }} file )
+            {% set desc = macros.search_obj_array(env_variables['wordpress'], 'var', 'WP_FOOTER_MENU_NAME', 'desc') %}
+            <div>
+                {{ macros.markup(" \\- #{desc}", macros.terminal_command('WP_FOOTER_MENU_NAME') ) }}
+            </div>
+        </div>
+        <div class="mt-3">
+            {% set desc = macros.search_obj_array(env_variables['wordpress'], 'var', 'WP_FOOTER_MENU', 'desc') %}
+            <div>
+                {{ macros.markup(" \\- #{desc}", macros.terminal_command('WP_FOOTER_MENU') ) }}
+            </div>
+        </div>
+    </div>
+    <div>
+        <h3 class="mt-0">Example of a semi-colon separated, comma delimited grouping.</h3>
+        <p>Take the following as an example:</p>
+        {{ macros.markup('=pages/page1.txt,pages/page2.txt,pages/page3.txt;pages/page4.txt,pages/page5.txt;', macros.terminal_command('WP_HEADER_MENU') ) }}
+        {{ macros.markup('=logo,,caweb;filter,menu;', macros.terminal_command('WP_HEADER_MENU') ) }}
+        <p class="mt-4">
+            This would create a header menu with 2 top level links each with a sub menu, Page2 & Page3 would be under Page1 and Page5 would be under Page4.
+            Icons will be applied so long as there is an icon is the same position.
+        </p>
+        <ul>
+            <li>
+                Page1 ( Top Level Link w/ logo icon )
+                <ul>
+                    <li>Page2 ( Submenu Link w/ no icon since it was left blank )</li>
+                    <li>Page3 ( Submenu Link w/ caweb icon )</li>
+                </ul>
+            </li>
+            <li>
+                Page4 ( Top Level Link w/ filter icon )
+                <ul>
+                    <li>Page5 ( Submenu Link w/ menu icon )</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock body %}

@@ -1,0 +1,21 @@
+<h3 class="my-0">Environment Variables</h3>
+<ul class="list-overstated">
+    <li><a href="{{ path('env/') }}caweb.html">CAWeb</a></li>
+    <li><a href="{{ path('env/') }}divi.html">Divi</a></li>
+    <li><a href="{{ path('env/') }}wordpress.html">WordPress</a></li>
+</ul>
+<h3 class="my-0">How To</h3>
+<ul class="list-overstated">
+    <li><a href="{{ path('/') }}how-to.html#wp_debug">Turn WP_DEBUG On/Off</a></li>
+    <li><a href="{{ path('/') }}how-to.html#caweb_tour">Disable CAWeb Product Tour</a></li>
+    <li><a href="{{ path('/') }}how-to.html#install_plugins">Pre-Install Plugins</a></li>
+    <li><a href="{{ path('/') }}how-to.html#create_pages">Create Pages/Posts</a></li>
+    <li><a href="{{ path('/') }}create-navigation.html">Create Navigation</a></li>
+</ul> 
+
+<h3 class="my-0">About</h3>
+<ul class="list-overstated">
+    <li><a href="{{ path('/') }}project.html">Project Breakdown</a></li>
+</ul> 
+
+

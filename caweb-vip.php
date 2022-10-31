@@ -5,10 +5,10 @@
  * Description: Resolves several WPVIP Environment issues for the CAWebPublishing Service
  * Author: California Department of Technology
  * Author URI: "https://github.com/Danny-Guzman"
- * Version: 1.0.4
+ * Version: 1.0.5
  * Network: true
  *
- * @package CAWeb VIP
+ * @package CAWebVIP
  */
 
 define( 'CAWEB_VIP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -17,62 +17,71 @@ define( 'CAWEB_VIP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 add_action( 'init', 'caweb_vip_init', 9 );
 add_action( 'admin_init', 'caweb_vip_admin_init' );
 add_action( 'admin_enqueue_scripts', 'caweb_vip_enqueue_scripts_styles' );
-add_action( 'admin_head', 'caweb_vip_admin_head', 999);
+add_action( 'admin_head', 'caweb_vip_admin_head', 999 );
 add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
 
-add_filter( 'et_cache_wpfs_credentials', 'caweb_vip_wpfs_credentials');
-
-/**
- * Returns credentials to interact with wp_filesystem
- *
- * @return bool|array
- */
-function caweb_vip_wpfs_credentials(){
-	return request_filesystem_credentials( site_url() );
-}
-
-// Disable non-mandatory Jetpack Modules.
+add_filter( 'et_cache_wpfs_credentials', 'caweb_vip_wpfs_credentials' );
 add_filter( 'option_jetpack_active_modules', 'caweb_vip_disable_jetpack_modules' );
 
 /**
- * Sets up Divi Cache Constants.
+ * Divi Builder (New Version) does not load
  *
- * @link https://codex.wordpress.org/Plugin_API/Action_Reference/after_setup_theme
- * @return void
+ * The New Divi Builder does not load properly due to the WPVIP FileSystem setup.
+ * Therefore, in order for Divi to interact properly with the GLOBAL $wp_filesystem variable we are forced to have to manually edit the Divi Theme and apply a custom filter directly to Divi/core/components/cache/Directory.php file 
+ * each time Divi makes a release and also have to change the Divi Cache constants which tell Divi the location of where to store the cache files.
+ *
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/144876
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/151700
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2178
+ * @p2 https://cdtp2.wordpress.com/2022/03/15/divi-builder-new-version-does-not-load/
+ * 
+ * @category add_filter( 'et_cache_wpfs_credentials', 'caweb_vip_wpfs_credentials');
+ * @return bool|array
  */
-function caweb_vip_after_setup_theme() {
-    define('ET_CORE_CACHE_DIR', wp_get_upload_dir()['basedir'].'/et-cache');
-    define('ET_CORE_CACHE_DIR_URL', wp_get_upload_dir()['baseurl'].'/et-cache');
+function caweb_vip_wpfs_credentials() {
+	return request_filesystem_credentials( site_url() );
 }
 
 /**
- * CAWeb VIP Admin Initialization
+ * Divi Builder (New Version) does not load
+ * 
+ * @see caweb_vip_wpfs_credentials
+ * @category add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
+ * @return void
+ */
+function caweb_vip_after_setup_theme() {
+	define( 'ET_CORE_CACHE_DIR', wp_get_upload_dir()['basedir'] . '/et-cache' );
+	define( 'ET_CORE_CACHE_DIR_URL', wp_get_upload_dir()['baseurl'] . '/et-cache' );
+}
+
+/**
+ * Updates to Geo Login Restriction
  *
- * Triggered before any other hook when a user accesses the admin area.
- * Note, this does not just run on user-facing admin screens.
- * It runs on admin-ajax.php and admin-post.php as well.
+ * Our security plugin no longer works on the WPVIP platform, so we've added functionality to prevent international logins.
  *
- * @link https://codex.wordpress.org/Plugin_API/Action_Reference/admin_init
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/146026
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2128
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2176
+ * 
+ * @category add_action( 'init', 'caweb_vip_init', 9 );
  * @return void
  */
 function caweb_vip_init() {
 	global $pagenow;
 
 	// Allow all VIP Support requests through their proxy for global support.
-
 	if ( 'wp-login.php' === $pagenow ) {
-		$region_lock = get_site_option( 'caweb_netadmin_default_region', true );
-		$country_code = isset( $_SERVER['GEOIP_COUNTRY_CODE'] ) && ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ? $_SERVER['GEOIP_COUNTRY_CODE']  : '';
-	    $is_vip = function_exists( 'is_proxied_request' ) && is_proxied_request();
+		$region_lock  = get_site_option( 'caweb_netadmin_default_region', true );
+		$country_code = isset( $_SERVER['GEOIP_COUNTRY_CODE'] ) && ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ? $_SERVER['GEOIP_COUNTRY_CODE'] : '';
+		$is_vip       = function_exists( 'is_proxied_request' ) && is_proxied_request();
 
 		// if user logged in from anywhere other than the US.
-		// if user is not WPVIP
+		// if user is not WPVIP.
 		if ( ! $is_vip && $region_lock && 'US' !== $country_code ) {
 			wp_logout();
 			wp_safe_redirect( get_site_url() );
 			exit;
 		}
-
 	}
 
 	/* Include CAWeb VIP Functionality */
@@ -82,13 +91,16 @@ function caweb_vip_init() {
 }
 
 /**
- * CAWeb VIP Admin Init
+ * Notification Suppression
  *
- * Triggered before any other hook when a user accesses the admin area.
- * Note, this does not just run on user-facing admin screens.
- * It runs on admin-ajax.php and admin-post.php as well.
+ * The system level notifications were displaying for Administrators, we are correcting this behaviour by removing those notifications for all but the Network Administrators.
  *
- * @link https://codex.wordpress.org/Plugin_API/Action_Reference/admin_init
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/149577
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/149578
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/151228
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2209
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2219
+ * 
  * @return void
  */
 function caweb_vip_admin_init() {
@@ -96,14 +108,17 @@ function caweb_vip_admin_init() {
 
 	if ( ! is_super_admin() ) {
 		remove_all_actions( 'network_admin_notices' );
-	    remove_all_actions( 'user_admin_notices' );
+		remove_all_actions( 'user_admin_notices' );
 		remove_all_actions( 'admin_notices' );
 
 		add_action( 'admin_notices', 'wpcom_vip_two_factor_admin_notice' );
 
-		/*if ( '1' == get_option( 'blog_public' ) ) {
+		/*
+		Remove notice if Restricted site access is set
+		if ( '1' == get_option( 'blog_public' ) ) {
 			add_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
-		}*/
+		}
+		*/
 	}
 
 }
@@ -112,9 +127,7 @@ function caweb_vip_admin_init() {
  * CAWeb VIP Admin Enqueue Scripts and Styles
  *
  * @link https://developer.wordpress.org/reference/hooks/admin_enqueue_scripts/
- *
  * @param  string $hook The current admin page.
- *
  * @return void
  */
 function caweb_vip_enqueue_scripts_styles( $hook ) {
@@ -138,16 +151,33 @@ function caweb_vip_enqueue_scripts_styles( $hook ) {
 }
 
 /**
- * Disable non-mandatory Jetpack Modules
- * note this disables the defaults `json-api`, `enhanced-distribution`, `notes`, `sso`, etc.
+ * Disable JetPack
  *
- * @see https://jetpack.com/support/module-overrides/
+ * WPVIP forces that the activation of the JetPack plugin, we've had to make the following fixes:<br />
+ * <ul>
+ * <li>Block access to users that are not Network Administrators</li>
+ * <li>Disable Feedback</li>
+ * <li>Prevent WordPress.com user login</li>
+ * <li>Removed Dashboard Widget</li>
+ * </ul>
  *
+ * @zendesk No Zendesk ticket submitted due to JetPack Plugin being a WPVIP requirement.
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2160
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2161
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2162
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2163
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2171
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2175
+ * 
  * @param  array $modules JetPack Modules.
  * @return array
  */
 function caweb_vip_disable_jetpack_modules( $modules ) {
-	// @see https://github.com/Automattic/vip-go-mu-plugins/blob/e1802e01acd8be4bf95b87fe6be55597bf7ad88f/vip-jetpack/jetpack-mandatory.php#L20-L21
+	/*
+		JetPack reference links
+		https://jetpack.com/support/module-overrides/
+		https://github.com/Automattic/vip-go-mu-plugins/blob/e1802e01acd8be4bf95b87fe6be55597bf7ad88f/vip-jetpack/jetpack-mandatory.php#L20-L21
+	 */
 	$allowed_modules = array(
 		'vaultpress',
 		'stats',
@@ -163,15 +193,16 @@ function caweb_vip_disable_jetpack_modules( $modules ) {
 /**
  * Fires in head section for all admin pages.
  *
- * @see https://developer.wordpress.org/reference/hooks/admin_head/
+ * @see caweb_vip_disable_jetpack_modules( $modules )
+ * 
  * @return void
  */
-function caweb_vip_admin_head(){
+function caweb_vip_admin_head() {
 	?>
 		<style>
 			div#jetpack_summary_widget.postbox{ display: none; }
 		</style>
 	<?php
-	
+
 }
 

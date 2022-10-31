@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template>
+    <name>caweb-addon</name>
+    <author>Danny Guzman</author>
+    <email>guzmanjd86@gmail.com</email>
+    <description>phpDocumentor Template Addon</description>
+    <version>1.0.0</version>
+    <transformations>
+        <!-- Change Branding Logo -->
+        <!--transformation writer="FileIo" query="copy" source="images/system/caweb-logo.png" artifact="imgs/branding.png" /-->
+        <!--transformation writer="FileIo" query="copy" source=".phpdoc/template/imgs/mariadb.png" artifact="imgs/mariadb.png" /-->
+        <!--transformation writer="FileIo" query="copy" source=".phpdoc/template/imgs/phpmyadmin.png" artifact="imgs/phpmyadmin.png" /-->
+        <!--transformation writer="FileIo" query="copy" source=".phpdoc/template/imgs/site.png" artifact="imgs/site.png" /-->
+
+        <!-- Template Specific Pages -->
+        <!-- Environment Variable Pages -->
+        <!--transformation writer="twig" source="env.html.twig" artifact="/env/CAWeb.html" /-->
+        <!--transformation writer="twig" source="env.html.twig" artifact="/env/Divi.html" /-->
+        <!--transformation writer="twig" source="env.html.twig" artifact="/env/WordPress.html" /-->
+
+        <!-- How To's Pages -->
+        <!--transformation writer="twig" source="how-to.html.twig" artifact="how-to.html" /-->
+        <!--transformation writer="twig" source="navigation.html.twig" artifact="create-navigation.html" /-->
+
+        <!-- Project Breakdown -->
+        <!--transformation writer="twig" source="project.html.twig" artifact="project.html" /-->
+
+    </transformations>
+</template>

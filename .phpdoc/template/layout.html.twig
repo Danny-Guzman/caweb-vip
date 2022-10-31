@@ -1,0 +1,469 @@
+{% set stable_version = project.settings.custom.stable_version %}
+
+{% set github_ref = 'https://github.com/' %}
+{% set gitub_href_link = github_ref ~ project.settings.custom.github_user ~ '/' ~ project.settings.custom.github_repo ~ '/blob/' ~ project.settings.custom.github_branch ~ '/' %}
+
+{% set colorscheme = colorscheme is not empty ? colorscheme : project.settings.custom.colorscheme %}
+{% set colorscheme = colorscheme is not empty ? colorscheme : 'santa barbara' %}
+
+{% set colorschemes = {	
+    'Delta' : [
+        {'hex': 'A5BDC5', 'rgb' : '165,189,197'},
+        {'hex': '577786', 'rgb' : '87,119,13'},
+        {'hex': '46565E', 'rgb' : '70,86,94'},
+        {'hex': 'f5f9fa', 'rgb' : '245,249,250'},
+    ],
+    'Eureka' : [
+        {'hex': 'D9B295', 'rgb' : '217,178,149'},
+        {'hex': '3E4B4D', 'rgb' : '62,75,77'},
+        {'hex': '21272A', 'rgb' : '33,39,42'},
+        {'hex': 'f9f8f8', 'rgb' : '249,248,248'},
+    ],
+    'Mono' : [
+        {'hex': 'ffce2b', 'rgb' : '255,206,43'},
+        {'hex': '545351', 'rgb' : '84,84,84'},
+        {'hex': '191919', 'rgb' : '25,25,25'},
+        {'hex': 'f4f3ef', 'rgb' : '244,243,239'},
+    ],
+    'Oceanside' : [
+        {'hex': 'FDB81E', 'rgb' : '253,184,30'},
+        {'hex': '046B99', 'rgb' : '4,107,153'},
+        {'hex': '323A45', 'rgb' : '50,58,69'},
+        {'hex': 'E1F2F7', 'rgb' : '225,242,247'},
+    ],
+    'Orange County' : [
+        {'hex': 'fbad23', 'rgb' : '251,173,35'},
+        {'hex': 'A15801', 'rgb' : '161,88,1'},
+        {'hex': '483723', 'rgb' : '50,58,69'},
+        {'hex': 'f1ede4', 'rgb' : '225,242,247'},
+    ],
+    'Paso Robles' : [
+        {'hex': 'fbad23', 'rgb' : '251,173,35'},
+        {'hex': '691808', 'rgb' : '105,24,8'},
+        {'hex': '313131', 'rgb' : '49,49,49'},
+        {'hex': 'f5f5f5', 'rgb' : '245,245,245'},
+    ],
+    'Sacramento' : [
+        {'hex': '7bb0da', 'rgb' : '123,176,218'},
+        {'hex': '153554', 'rgb' : '21,53,84'},
+        {'hex': '730000', 'rgb' : '115,0,0'},
+        {'hex': 'e1ecf7', 'rgb' : '225,236,247'},
+    ],
+    'Santa Barbara' : [
+        {'hex': 'FF9B53', 'rgb' : '255,155,83'},
+        {'hex': '834B1E', 'rgb' : '131,75,30'},
+        {'hex': '3c2c29', 'rgb' : '60,44,41'},
+        {'hex': 'FFEBD7', 'rgb' : '255,235,215'},
+    ],
+    'Santa Cruz' : [
+        {'hex': 'f5811b', 'rgb' : '245,129,27'},
+        {'hex': '0f4f94', 'rgb' : '15,79,148'},
+        {'hex': '2c2c4f', 'rgb' : '44,44,79'},
+        {'hex': 'E1ECF7', 'rgb' : '225,236,247'},
+    ],
+    'Shasta' : [
+        {'hex': 'fbad23', 'rgb' : '251,173,35'},
+        {'hex': '336c39', 'rgb' : '51,108,57'},
+        {'hex': '3c4543', 'rgb' : '60,69,67'},
+        {'hex': 'effaf6', 'rgb' : '239,250,246'},
+    ],
+    'Sierra' : [
+        {'hex': 'fbad23', 'rgb' : '251,173,35'},
+        {'hex': '447766', 'rgb' : '68,119,102'},
+        {'hex': '194949', 'rgb' : '25,73,73'},
+        {'hex': 'effaf6', 'rgb' : '239,250,246'},
+    ],
+    'Trinity' : [
+        {'hex': 'c19e73', 'rgb' : '193,158,115'},
+        {'hex': '446a7c', 'rgb' : '68,106,124'},
+        {'hex': '21272a', 'rgb' : '33,39,42'},
+        {'hex': 'f9f8f8', 'rgb' : '249,248,248'},
+    ]
+} %}
+
+
+{% set env_variables = {
+    'caweb': [
+        { 
+            'var' : 'CAWEB_VER',
+            'desc' : 'Leaving this blank will download the latest <a href="https://github.com/CA-CODE-Works/CAWeb/releases/latest" target="_blank">Official CAWeb Release</a>.'
+        },
+        { 
+            'var' : 'CAWEB_GIT_USER',
+            'desc' : 'If this is blank, CAWeb will always be downloaded from the <a href="https://github.com/CA-CODE-Works/CAWeb" target="_blank">https://github.com/CA-CODE-Works/CAWeb</a>, otherwise CAWeb will be cloned from https://github.com/`<CAWEB_GIT_USER>`/CAWeb. If `CAWEB_VER` is not blank, the cloned repo will checkout the `CAWEB_VER` branch'
+        },
+        { 
+            'var' : 'CAWEB_PRODUCT_TOUR',
+            'desc' : 'This will create the CAWeb Sample Module Pages/Posts/Navigation.'
+        },
+        { 
+            'var' : 'CAWEB_TEMPLATE_VER',
+            'desc' : 'State Template Version used site wide, choices are `5.5` or `6.0`.'
+        },
+        { 
+            'var' : 'CAWEB_FAV_ICON',
+            'desc' : 'Site Fav Icon.'
+        },
+        { 
+            'var' : 'CAWEB_NAV_MENU_STYLE',
+            'desc' : 'Set a menu style of all pages, choices are `megadropdown`, `dropdown`, `singlelevel`.'
+        },
+        { 
+            'var' : 'CAWEB_COLORSCHEME',
+            'desc' : 'State Template Colorscheme used site wide, choices are `eureka`, `mono`, `oceanside`, `orangecounty`, `pasorobles`, `sacramento`, `santabarbara`, `sierra`, `trinity`, `delta`, `santacruz`, `shasta`.'
+        },
+        { 
+            'var' : 'CAWEB_TITLE_DISPLAY',
+            'desc' : 'Suprresses the title for all new pages/posts.'
+        },
+        { 
+            'var' : 'CAWEB_STICKY_NAV',
+            'desc' : 'Keep the navigation menu visible when scrolling.'
+        },
+        { 
+            'var' : 'CAWEB_MENU_HOME_LINK',
+            'desc' : 'Adds Home link to navigation when not on frontpage.'
+        },
+        { 
+            'var' : 'CAWEB_DISPLAY_POSTS_DATE',
+            'desc' : 'Display the post published date for non-Divi posts.'
+        },
+        { 
+            'var' : 'CAWEB_MENU_HOME_LINK',
+            'desc' : 'Adds Home link to navigation when not on frontpage.'
+        },
+        { 
+            'var' : 'CAWEB_X_UA_COMPATIBILITY',
+            'desc' : 'Legacy Browser Support, this causes a trade off, IE browser will work better but may have accessibility errors.'
+        },
+        { 
+            'var' : 'CAWEB_FRONTPAGE_SEARCH',
+            'desc' : 'Enables Feature Search box on home page.'
+        },
+        { 
+            'var' : 'CAWEB_DESIGN_SYSTEM_ENABLED',
+            'desc' : 'Enables CAGov Design System.'
+        },
+        { 
+            'var' : 'CAWEB_ORG_LOGO',
+            'desc' : 'Site Organization Logo.'
+        },
+        { 
+            'var' : 'CAWEB_ORG_LOGO_ALT_TEXT',
+            'desc' : 'Site Organization Logo alternate text.'
+        },
+        { 
+            'var' : 'CAWEB_SEARCH_ENGINE_ID',
+            'desc' : 'Google Search Engine ID.'
+        },
+        { 
+            'var' : 'CAWEB_ANALYTICS_ID',
+            'desc' : 'Google Analytics ID.'
+        },
+        { 
+            'var' : 'CAWEB_META_ID',
+            'desc' : 'Google Site Verification Meta ID.'
+        },
+        { 
+            'var' : 'CAWEB_TRANSLATE_MODE',
+            'desc' : 'Display the Google translate feature, choices are `none`, `standard`, `custom`.'
+        },
+        { 
+            'var' : 'CAWEB_TRANSLATE_PAGE',
+            'desc' : 'Only if `CAWEB_TRANSLATE_MODE` is custom, Select a Page/Post where the Google Translate Service is located.'
+        },
+        { 
+            'var' : 'CAWEB_TRANSLATE_PAGE_NEW_WINDOW',
+            'desc' : 'Only if `CAWEB_TRANSLATE_MODE` is custom, open the `CAWEB_TRANSLATE_PAGE` in new window.'
+        },
+        { 
+            'var' : 'CAWEB_TRANSLATE_ICON',
+            'desc' : 'Only if `CAWEB_TRANSLATE_MODE` is custom, Icon for the Google Translate.'
+        },
+        { 
+            'var' : 'CAWEB_CONTACT_US_PAGE',
+            'desc' : 'URL to the "Contact Us" page.'
+        },
+        { 
+            'var' : 'CAWEB_GEO_LOCATOR',
+            'desc' : 'Display the geo locator feature.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_HOME_LINK',
+            'desc' : 'Puts a home icon/link on the left side of the utility header.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK1_ENABLED',
+            'desc' : 'Enables the first custom link.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK1_LABEL',
+            'desc' : 'First Custom link label text.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK1_URL',
+            'desc' : 'First Custom link URL.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK1_NEW_WINDOW',
+            'desc' : 'Whether to open First Custom link in a new tab.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK2_ENABLED',
+            'desc' : 'Enables the second custom link.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK2_LABEL',
+            'desc' : 'Second Custom link label text.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK2_URL',
+            'desc' : 'Second Custom link URL.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK2_NEW_WINDOW',
+            'desc' : 'Whether to open Second Custom link in a new tab.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK3_ENABLED',
+            'desc' : 'Enables the third custom link.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK3_LABEL',
+            'desc' : 'Third Custom link label text.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK3_URL',
+            'desc' : 'Third Custom link URL.'
+        },
+        { 
+            'var' : 'CAWEB_UTILITY_LINK3_NEW_WINDOW',
+            'desc' : 'Whether to open Third Custom link in a new tab.'
+        },
+    ],
+    'divi' : [
+        { 
+            'var' : 'ET_USERNAME',
+            'desc' : 'ElegantThemes Account Username.'
+        },
+        { 
+            'var' : 'ET_API_KEY',
+            'desc' : 'ElegantThemes Account API Key.'
+        },
+        { 
+            'var' : 'ET_PRODUCT_TOUR',
+            'desc' : 'Divi Builder Product Tour.'
+        },
+        { 
+            'var' : 'ET_NEW_BUILDER_EXPERIENCE',
+            'desc' : 'Enable The Latest Divi Builder Experience.'
+        },
+        { 
+            'var' : 'ET_CLASSIC_EDITOR',
+            'desc' : 'Enable Classic Editor.'
+        },
+    ],
+    'wordpress' : [
+        {
+            'var' : 'WEB_URL',
+            'desc' : 'Default is localhost.'
+        },
+        {
+            'var' : 'WEB_URL_PORT',
+            'desc' : 'Default is 8080.'
+        },
+        {
+            'var' : 'WP_MULTI_SITE',
+            'desc' : 'Installs a Multisite WordPress instance.'
+        },
+        {
+            'var' : 'WP_SUBDOMAIN',
+            'desc' : 'Install Multisite WordPress as Subdomain, defaults to subdirectories.'
+        },
+        {
+            'var' : 'WP_PERMALINK',
+            'desc' : 'WordPress Permalink Structure.'
+        },
+        {
+            'var' : 'WP_DEFAULT_THEME',
+            'desc' : 'Default theme that should be activated.'
+        },
+        {
+            'var' : 'WP_DEBUG',
+            'desc' : 'Controls the reporting of some errors and warnings and enables use of the `WP_DEBUG_DISPLAY` and `WP_DEBUG_LOG` settings.'
+        },
+        {
+            'var' : 'WP_DEBUG_LOG',
+            'desc' : 'This will log all errors notices and warnings to a file called debug.log in wp-content.'
+        },
+        {
+            'var' : 'WP_DEBUG_DISPLAY',
+            'desc' : 'This will display all errors notices and warnings on the screen.'
+        },
+        {
+            'var' : 'WP_MEMORY_LIMIT',
+            'desc' : 'Allows you to specify the maximum amount of memory that can be consumed by PHP.'
+        },
+        {
+            'var' : 'WP_MAX_MEMORY_LIMIT',
+            'desc' : 'Administration tasks require much memory than usual operation. When in the administration area, the memory can be increased or decreased from the `WP_MEMORY_LIMIT` by defining `WP_MAX_MEMORY_LIMIT`.'
+        },
+        {
+            'var' : 'WP_FORCE_SSL_ADMIN',
+            'desc' : 'When you want to secure logins and the admin area so that both passwords and cookies are never sent in the clear.'
+        },
+        {
+            'var' : 'WP_PLUGINS',
+            'desc' : 'A comma separated list of WordPress Plugins to install, plugins must be in the <a href="https://wordpress.org/plugins/" target="_blank">WordPress Plugin Directory</a>.'
+        },
+        {
+            'var' : 'WP_COOKIE_DOMAIN',
+            'desc' : 'The domain set in the cookies for WordPress.'
+        },
+        {
+            'var' : 'WP_FS_METHOD',
+            'desc' : 'Forces the filesystem method. It should only be `direct`, `ssh2`, `ftpext`, or `ftpsockets`.'
+        },
+        {
+            'var' : 'WP_ALLOW_UNFILTERED_UPLOADS',
+            'desc' : 'Allow for unrestricted file upload.'
+        },
+        {
+            'var' : 'WP_PLUGIN_REMOVE',
+            'desc' : 'A comma separated list of WordPress Plugins to uninstall.'
+        },
+        {
+            'var' : 'WP_VIP',
+            'desc' : 'Enables WPVIP must-use plugins.'
+        },
+        {
+            'var' : 'WP_SITE_TITLE',
+            'desc' : 'Site Title.'
+        },
+        {
+            'var' : 'WP_ADMIN_USER',
+            'desc' : 'Admin Username.'
+        },
+        {
+            'var' : 'WP_ADMIN_EMAIL',
+            'desc' : 'Admin Email.'
+        },
+        {
+            'var' : 'WP_ADMIN_PASSWORD',
+            'desc' : 'Admin Password.'
+        },
+        {
+            'var' : 'SHOW_ON_FRONT',
+            'desc' : 'Display Page/Post/Latest Post as FrontPage. Default is page, options are `page` or `post`.'
+        },
+        {
+            'var' : 'PAGE_ON_FRONT',
+            'desc' : 'Page/Post ID desired as FrontPage, default is 2.'
+        },
+        {
+            'var' : 'WP_DEFAULT_POST',
+            'desc' : 'Replace default WordPress "Hello World!" Post with content from desired project file (wordpress/posts/<filename>).'
+        },
+        {
+            'var' : 'WP_DEFAULT_PAGE',
+            'desc' : 'Replace default WordPress "Sample Page" Page with content from desired project file (wordpress/pages/<filename>).'
+        },
+        {
+            'var' : 'WP_HEADER_MENU_NAME',
+            'desc' : 'Name of the Header Menu.'
+        },
+        {
+            'var' : 'WP_HEADER_MENU',
+            'desc' : 'A semi-colon separated, comma delimited grouping of pages/posts created using the [Create Pages/Posts](./how-to.html#create_pages) method.'
+        },
+        {
+            'var' : 'WP_HEADER_MENU_ICONS',
+            'desc' : 'A semi-colon separated, comma delimited grouping of icons names to assign to the navigation links.'
+        },
+        {
+            'var' : 'WP_FOOTER_MENU_NAME',
+            'desc' : 'Name of the Footer Menu.'
+        },
+        {
+            'var' : 'WP_FOOTER_MENU',
+            'desc' : 'A semi-colon separated, comma delimited grouping of pages/posts created using the [Create Pages/Posts](./how-to.html#create_pages) method.'
+        },
+    ]
+} %}
+
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+    <head>
+        <link rel="stylesheet" href="{{ path('/') }}css/cagov.core.css">
+
+        {% block head %}
+        {% endblock head %}
+        
+        {% block colorscheme %}
+        {% if colorscheme %}
+        <link rel="stylesheet" href="{{ path('/') }}css/colorscheme-{{ colorscheme|replace({' ' : ''})|lower }}.css">
+        {% endif %}
+        {% endblock colorscheme %}
+        
+        {{ include('inc/head.html') }}
+        {# Dynamic Styles #}
+        {% apply spaceless %}
+        {% set icon_bg_color = colorschemes[colorscheme|title][1].hex %}
+        <style>
+            /* Dynamic Styles */ 
+            .letter-icon:not(.diamond):before {
+                background-color: #{{ icon_bg_color }};
+            }
+            .letter-icon.diamond {
+                border-bottom-color: #{{ icon_bg_color }};
+            }
+            .letter-icon.diamond:after {
+                border-top-color: #{{ icon_bg_color }};
+            }
+        </style>
+        {% endapply %}
+    </head>
+    <body class="primary non_divi_builder">
+        {% include 'inc/header.html' %}
+
+        <div id="page-container">
+            <div id="et-main-area">
+                <div id="main-content" class="main-content" tabindex="-1">
+                    <main class="main-primary">
+                        <div class="section">
+                            <div class="container">
+                                    <!-- Sidebar -->
+                                    {% block sidebar %}
+                                    <div class="quarter">
+                                        {% block sidebar_content %}
+                                        {% include 'inc/sidebar.html' %}
+                                        {% endblock %}
+                                    </div>
+                                    {% endblock %}
+
+                                    <!-- Introduction -->
+                                    {% block introduction %}
+                                    {% endblock introduction %}
+                                        
+
+                                    <!-- Table of Contents -->
+                                    {% block table_of_contents %}
+                                    {% endblock table_of_contents %}
+                
+                                    <!-- Body Content -->
+                                    {% block body %}
+                                    {% endblock body %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer id="footer" class="global-footer hidden-print">
+            {{ include('inc/footer.html') }}
+            <script src="{{ path('/')  }}js/cagov.core.js"></script>
+        </footer>
+    </body>
+</html>

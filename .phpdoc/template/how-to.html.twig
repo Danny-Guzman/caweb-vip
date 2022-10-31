@@ -1,0 +1,65 @@
+{% extends "layout.html.twig" %}
+{% import "macros.twig" as macros %}
+
+{% block head %}
+<title>{{ project.name }} How To's</title>
+{% endblock head %}
+
+{% block introduction %}
+<div class="offset-quarter">
+    <h1 class="my-0">How To</h1>
+</div>
+{% endblock introduction %}
+
+{% block table_of_contents %}
+{% endblock table_of_contents %}
+
+{% block body %}
+<div class="offset-quarter">
+    <div class="pl-0">
+        <!-- WordPress Debug -->
+        <h3 id="wp_debug" class="my-0">Turn WP_DEBUG On/Off</h3>
+        <div>
+            By default the WordPress Debug is turned on. To turn debug mode off edit the 
+            {{ macros.markup('`env/wp.env`') }}
+            file and set 
+            {{ macros.markup('`WP_DEBUG`') }}, 
+            {{ macros.markup('`WP_DEBUG_DISPLAY`') }}, 
+            {{ macros.markup('`WP_DEBUG_LOG`') }}
+            to false. 
+        </div>
+        <!-- CAWeb Product Tour -->
+        <h3 id="caweb_tour" class="mb-0">Enable/Disable CAWeb Product Tour</h3>
+        <div>
+            By default when launching this project there is a sample header menu, footer menu, and various pages of the modules 
+            created for you. To turn these off. Edit the 
+            {{ macros.markup('`env/caweb.env`') }} 
+            file and set 
+            {{ macros.markup('`CAWEB_PRODUCT_TOUR`') }} 
+            to false.
+        </div>
+        <!-- Pre-Install Plugins -->
+        <h3 id="install_plugins" class="mb-0">Pre-Install Plugins</h3>
+        <div>
+            Edit the 
+            {{ macros.markup('`env/wp.env`') }} 
+            and add the WordPress Plugin slugs to the 
+            {{ macros.markup('`WP_PLUGINS`') }} 
+            separated by commas, plugins must be in the <a href="https://wordpress.org/plugins/" target="_blank">WordPress Plugin Directory</a>
+        </div>
+        
+        <!-- Create Pages/Posts -->
+        <h3 id="create_pages" class="mb-0">Create Pages/Posts</h3>
+        <div>
+            By adding files to the {{ macros.markup('`wordpress/pages`') }} or {{ macros.markup('`wordpress/posts`') }} 
+            respective directories the CAWeb Docker Image will run the 
+            <a href="https://developer.wordpress.org/cli/commands/post/create/" target="_blank">wp-cli post create</a> 
+            command with each file in attempts to create pages/posts. Nesting files within folders will create a page hierarchy. 
+            The filename is saved when creating pages/post as a new 
+            <a href="https://developer.wordpress.org/reference/functions/update_post_meta/" target="_blank">post meta field</a> 
+            {{ macros.markup('`_caweb_page_created`') }}, this is used when creating Navigation Menu's.
+        </div>
+
+    </div>
+</div>
+{% endblock body %}
