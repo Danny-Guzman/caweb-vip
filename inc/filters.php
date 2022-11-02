@@ -17,12 +17,30 @@ add_filter( 'wpforms_upload_root', 'caweb_vip_upload_root', 10, 1 );
 add_filter( 'js_do_concat', '__return_false' );
 add_filter( 'css_do_concat', '__return_false' );
 
-
 /**
  * Better function for Divi getting an attachments ID from its URL
  * @see https://wordpressvip.zendesk.com/hc/en-us/requests/155684
  */
 add_filter('et_get_attachment_id_by_url_pre', 'caweb_vip_get_attachment_id', 10, 2 );
+
+add_filter( 'et_core_cache_wpfs_args', 'caweb_vip_wpfs_credentials');
+
+/**
+ * Divi Builder (New Version) does not load
+ *
+ * The New Divi Builder does not load properly due to the WPVIP FileSystem setup, Divi has applied the requested filter to their theme.
+ *
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/144876
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/151700
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2178
+ * @p2 https://cdtp2.wordpress.com/2022/03/15/divi-builder-new-version-does-not-load/
+ * 
+ * @category add_filter( 'et_cache_wpfs_credentials', 'caweb_vip_wpfs_credentials');
+ * @return bool|array
+ */
+function caweb_vip_wpfs_credentials(){
+	return request_filesystem_credentials( site_url() );
+}
 
 /**
  * Filters the post content adding the vip cache busting query variable to any src/href attributes.

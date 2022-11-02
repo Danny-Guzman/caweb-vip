@@ -20,27 +20,7 @@ add_action( 'admin_enqueue_scripts', 'caweb_vip_enqueue_scripts_styles' );
 add_action( 'admin_head', 'caweb_vip_admin_head', 999 );
 add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
 
-add_filter( 'et_cache_wpfs_credentials', 'caweb_vip_wpfs_credentials' );
 add_filter( 'option_jetpack_active_modules', 'caweb_vip_disable_jetpack_modules' );
-
-/**
- * Divi Builder (New Version) does not load
- *
- * The New Divi Builder does not load properly due to the WPVIP FileSystem setup.
- * Therefore, in order for Divi to interact properly with the GLOBAL $wp_filesystem variable we are forced to have to manually edit the Divi Theme and apply a custom filter directly to Divi/core/components/cache/Directory.php file 
- * each time Divi makes a release and also have to change the Divi Cache constants which tell Divi the location of where to store the cache files.
- *
- * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/144876
- * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/151700
- * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2178
- * @p2 https://cdtp2.wordpress.com/2022/03/15/divi-builder-new-version-does-not-load/
- * 
- * @category add_filter( 'et_cache_wpfs_credentials', 'caweb_vip_wpfs_credentials');
- * @return bool|array
- */
-function caweb_vip_wpfs_credentials() {
-	return request_filesystem_credentials( site_url() );
-}
 
 /**
  * Divi Builder (New Version) does not load
