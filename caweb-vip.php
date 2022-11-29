@@ -5,7 +5,7 @@
  * Description: Resolves several WPVIP Environment issues for the CAWebPublishing Service
  * Author: California Department of Technology
  * Author URI: "https://github.com/Danny-Guzman"
- * Version: 1.0.6
+ * Version: 1.0.5
  * Network: true
  *
  * @package CAWebVIP
@@ -21,12 +21,36 @@ add_action( 'admin_head', 'caweb_vip_admin_head', 999 );
 add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
 
 add_filter( 'option_jetpack_active_modules', 'caweb_vip_disable_jetpack_modules' );
+add_filter( 'et_core_cache_wpfs_args', 'caweb_vip_wpfs_credentials');
+
+
+// If New Relic Extension is loaded.
+if( extension_loaded( 'newrelic' ) ){
+	require_once CAWEB_VIP_PLUGIN_DIR . 'core/newrelic.php';
+}
+
+/**
+ * Divi Builder (New Version) does not load
+ *
+ * The New Divi Builder does not load properly due to the WPVIP FileSystem setup, Divi has applied the requested filter to their theme.
+ *
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/144876
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/151700
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2178
+ * @p2 https://cdtp2.wordpress.com/2022/03/15/divi-builder-new-version-does-not-load/
+ * 
+ * @wp_filter add_filter( 'et_cache_wpfs_credentials', 'caweb_vip_wpfs_credentials');
+ * @return bool|array
+ */
+function caweb_vip_wpfs_credentials(){
+	return request_filesystem_credentials( site_url() );
+}
 
 /**
  * Divi Builder (New Version) does not load
  * 
  * @see caweb_vip_wpfs_credentials
- * @category add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
+ * @wp_action add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
  * @return void
  */
 function caweb_vip_after_setup_theme() {
@@ -43,7 +67,7 @@ function caweb_vip_after_setup_theme() {
  * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2128
  * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2176
  * 
- * @category add_action( 'init', 'caweb_vip_init', 9 );
+ * @wp_action add_action( 'init', 'caweb_vip_init', 9 );
  * @return void
  */
 function caweb_vip_init() {
@@ -85,6 +109,8 @@ function caweb_vip_init() {
  */
 function caweb_vip_admin_init() {
 	require_once CAWEB_VIP_PLUGIN_DIR . 'core/class-caweb-vip-plugin-update.php';
+
+	caweb_vip_allow_filename_lookup();
 
 	if ( ! is_super_admin() ) {
 		remove_all_actions( 'network_admin_notices' );
@@ -186,3 +212,13 @@ function caweb_vip_admin_head() {
 
 }
 
+/**
+ * Remove VIP action preventing core from doing filename lookups for media search.
+ * 
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/156784
+ * 
+ * @return void
+ */
+function caweb_vip_allow_filename_lookup(){
+	remove_action( 'pre_get_posts', 'vip_filter_query_attachment_filenames' );
+}
