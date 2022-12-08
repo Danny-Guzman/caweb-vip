@@ -171,7 +171,13 @@ function caweb_vip_get_attachment_id( $value, $url ) {
 
 	// remove query parameters to better match whats on the guid column
 	$url_parts = parse_url($url);
-	$reconstructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'];
+
+	// Check for returned scheme, so we can separately handle relative background image paths.
+	if ( array_key_exists( 'scheme', $url_parts ) ) {
+		$reconstructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'];
+	} else {
+		$reconstructed_url = get_site_url() . $url_parts['path'];
+	}	
 
 	if( function_exists('wpcom_vip_attachment_url_to_postid') )
 		return wpcom_vip_attachment_url_to_postid( $reconstructed_url );
