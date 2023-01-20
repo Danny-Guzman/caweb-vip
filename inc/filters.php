@@ -17,11 +17,6 @@ add_filter( 'wpforms_upload_root', 'caweb_vip_upload_root', 10, 1 );
 add_filter( 'js_do_concat', '__return_false' );
 add_filter( 'css_do_concat', '__return_false' );
 
-/**
- * Restrict unpublished files
- * @see https://docs.wpvip.com/technical-references/restricting-site-access/access-controlled-files/
- */
-//add_filter( 'pre_option_vip_files_acl_restrict_unpublished_enabled' );
 
 /**
  * Better function for Divi getting an attachments ID from its URL
@@ -39,14 +34,11 @@ add_filter('et_get_attachment_id_by_url_pre', 'caweb_vip_get_attachment_id', 10,
  * @return string
  */
 function caweb_vip_the_content( $output ) {
-	$mime_types = array_keys(get_allowed_mime_types());
-	$extensions = join("|",$mime_types);
-
 	/**
 	 * Changing the delimiter used for the regex pattern
 	 * @link https://www.php.net/manual/en/regexp.reference.delimiters.php
 	 */
-	preg_match_all( sprintf('~src="(%1$s[\w\d\S]+)"|href="(%1$s[\w\d\S]+\.(%2$s))"~', get_site_url(), $extensions), $output, $matches );
+	preg_match_all( sprintf('~src="(%1$s[^"]+?)"|href="(%1$s[^"]+?)"~', get_site_url(null, '/') ), $output, $matches );
 
 	if ( ! empty( $matches ) ) {
 		$srcs = array_filter($matches[1]);
@@ -57,16 +49,22 @@ function caweb_vip_the_content( $output ) {
 
 		$changes = array_map(
 			function( $url ) {
-				return ! empty( $url ) ? caweb_vip_add_cache_bust_query( $url ) : false;
+				return caweb_vip_add_cache_bust_query( $url );
 			},
 			$urls
 		);
 
-		foreach(array_unique($matches[0]) as $i => $match){
-			$changes[$i] = str_replace($urls[$i], $changes[$i], $match);
+		$tmp = array();
+
+		foreach($matches[0] as $i => $match){
+			$list_index = ! empty($matches[1][$i]) ? 1 : 2;
+			$match_index = array_search( $matches[$list_index][$i], $urls );
+			
+			$tmp[$i] = str_replace($matches[$list_index][$i], $changes[$match_index], $match);
+			
 		}
 
-		$output = str_replace(array_unique($matches[0]) , $changes, $output);
+		$output = str_replace($matches[0] , $tmp, $output);
 	}
 
 	return $output;
@@ -147,8 +145,8 @@ function caweb_vip_upload_root( $path ) {
 	// this did not work
 	//return is_admin() ? get_temp_dir() : wp_get_upload_dir()['basedir'] . '/wpforms';
 	
-	return get_temp_dir();
-
+	//return get_temp_dir();
+	return wp_get_upload_dir()['basedir'] . '/wpforms';
 }
 
 /**
@@ -184,13 +182,3 @@ function caweb_vip_get_attachment_id( $value, $url ) {
 
 	return false;
 }
-
-/**
- * Restrict access to unpublished files
- * @see https://docs.wpvip.com/technical-references/restricting-site-access/access-controlled-files/
- * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2267/
- */
-/*function caweb_vip_restrict_access_to_unpublished_files ( $value ) {
-	return 1;
-
-}*/

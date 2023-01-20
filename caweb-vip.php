@@ -5,7 +5,7 @@
  * Description: Resolves several WPVIP Environment issues for the CAWebPublishing Service
  * Author: California Department of Technology
  * Author URI: "https://github.com/Danny-Guzman"
- * Version: 1.0.7
+ * Version: 1.0.8
  * Network: true
  *
  * @package CAWebVIP
@@ -23,10 +23,27 @@ add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
 add_filter( 'option_jetpack_active_modules', 'caweb_vip_disable_jetpack_modules' );
 add_filter( 'et_core_cache_wpfs_args', 'caweb_vip_wpfs_credentials');
 
-
 // If New Relic Extension is loaded.
 if( extension_loaded( 'newrelic' ) ){
 	require_once CAWEB_VIP_PLUGIN_DIR . 'core/newrelic.php';
+}
+
+/**
+ * Restrict site access 
+ * 
+ * @see https://docs.wpvip.com/technical-references/restricting-site-access/access-controlled-files/
+ * 
+ * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/149577
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2267/
+ */
+if ( '2' === get_option( 'blog_public' ) ) {
+	// Suppress rsa messages.
+	remove_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
+
+	// restrict access to unpublished files if Restricted site access is set.
+	add_filter( 'pre_option_vip_files_acl_restrict_all_enabled', function( $value ) {
+		return 1;
+	} );
 }
 
 /**
@@ -119,12 +136,10 @@ function caweb_vip_admin_init() {
 
 		add_action( 'admin_notices', 'wpcom_vip_two_factor_admin_notice' );
 
-		/*
-		Remove notice if Restricted site access is set
-		if ( '1' == get_option( 'blog_public' ) ) {
-			add_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
+		if ( '2' === get_option( 'blog_public' ) ) {
+			// Suppress rsa messages.
+			remove_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
 		}
-		*/
 	}
 
 }
