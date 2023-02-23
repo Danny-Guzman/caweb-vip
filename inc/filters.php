@@ -41,12 +41,14 @@ function caweb_vip_the_content( $output ) {
 	preg_match_all( sprintf('~src="(%1$s[^"]+?)"|href="(%1$s[^"]+?)"~', get_site_url(null, '/') ), $output, $matches );
 
 	if ( ! empty( $matches ) ) {
+
 		$srcs = array_filter($matches[1]);
 		$hrefs = array_filter($matches[2]);
 
+
 		$urls = array_unique($srcs + $hrefs);
 		ksort($urls);
-
+		
 		$changes = array_map(
 			function( $url ) {
 				return caweb_vip_add_cache_bust_query( $url );
@@ -89,7 +91,17 @@ function caweb_vip_the_content( $output ) {
 function caweb_vip_add_cache_bust_query( $url ) {
 	$url_to_bust = is_array( $url ) ? $url[0] : $url;
 
-    $url_busted = add_query_arg( 'emrc', caweb_vip_get_attachment_version_number( $url_to_bust ),  $url_to_bust);
+	$types = get_allowed_mime_types();
+	$mimes = explode('|',implode('|',array_keys($types)));
+	$busting = false;
+
+	foreach($mimes as $mime){
+		if( str_ends_with($url_to_bust, $mime) ){
+			$busting = true;
+		}
+	}
+
+    $url_busted = $busting ? add_query_arg( 'emrc', caweb_vip_get_attachment_version_number( $url_to_bust ),  $url_to_bust) : $url_to_bust;
 
 	if ( is_array( $url ) ) {
 	    $url[0] = $url_busted;
