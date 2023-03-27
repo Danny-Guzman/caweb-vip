@@ -135,8 +135,18 @@ function caweb_vip_new_relic() {
     $path            = $parsed_site_url['path'] ?? '';
 	$current_site = $_SERVER['HTTP_HOST'] . $path;
 
-    if ( ! is_main_site() && in_array( "$current_site/", $new_relic_apms, true ) ) {
-        newrelic_set_appname( $current_site );
+    if ( ! is_main_site() ) {
+		// set newrelic appname if current site should have its own monitoring bucket
+		if( in_array( "$current_site/", $new_relic_apms, true ) ){
+			newrelic_set_appname( $current_site );
+		}else{
+			/**
+			 * Disable New Relic's browser metrics
+			 *
+			 * Removes New Relic's JavaScript for tracking browser metrics, including page load times, Apdex score, and more.
+			 */
+			add_action( 'template_redirect', 'wpcom_vip_disable_new_relic_js' );
+		}
     }
 }
 

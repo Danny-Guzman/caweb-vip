@@ -27,7 +27,10 @@ function caweb_vip_cache_maxage( $wp ) {
 	$caweb_vip_ttl               = get_site_option( 'caweb_vip_cache_maxage', 30 );
 	$change_tll_on_this_template = is_singular() || is_front_page() || is_archive();
 
-	if ( ! is_user_logged_in() && $change_tll_on_this_template ) {
+	// RSA sets to value of 2 when site is restricted. do not accidentally send max-age on restricted sites.
+	$site_is_restricted = ( '2' === get_option( 'blog_public') || '2' === get_site_option( 'blog_public' ) );
+
+	if ( ! is_user_logged_in() && $change_tll_on_this_template && ! $site_is_restricted ) {
 		header( 'Cache-Control: max-age=' . ( $caweb_vip_ttl * 60 ) );
 	}
 }

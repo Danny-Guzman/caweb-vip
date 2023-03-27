@@ -9,6 +9,23 @@
 add_action( 'wp_ajax_caweb_vip_clear_cache', 'caweb_vip_clear_cache' );
 add_action( 'wp_ajax_caweb_vip_clear_all_cache', 'caweb_vip_clear_all_cache' );
 
+add_action( 'wp_ajax_wpforms_tools_entries_export_step', 'caweb_vip_wp_ajax_wpforms_tools_entries_export_step' );
+
+/**
+ * Ajax endpoint for WPForms Entries export processing.
+ *
+ * @return void
+ */
+function caweb_vip_wp_ajax_wpforms_tools_entries_export_step() {
+    global $wp_filesystem;
+
+    if ( ! is_a( $wp_filesystem, 'WP_Filesystem_Base') ) {
+        $creds = request_filesystem_credentials( site_url() );
+        wp_filesystem( $creds );
+    }
+}
+
+
 /**
  * Clears the cache for a specific page or object
  *

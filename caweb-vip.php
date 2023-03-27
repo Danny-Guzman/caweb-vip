@@ -5,7 +5,7 @@
  * Description: Resolves several WPVIP Environment issues for the CAWebPublishing Service
  * Author: California Department of Technology
  * Author URI: "https://github.com/Danny-Guzman"
- * Version: 1.0.9
+ * Version: 1.0.10
  * Network: true
  *
  * @package CAWebVIP
@@ -26,24 +26,6 @@ add_filter( 'et_core_cache_wpfs_args', 'caweb_vip_wpfs_credentials');
 // If New Relic Extension is loaded.
 if( extension_loaded( 'newrelic' ) ){
 	require_once CAWEB_VIP_PLUGIN_DIR . 'core/newrelic.php';
-}
-
-/**
- * Restrict site access 
- * 
- * @see https://docs.wpvip.com/technical-references/restricting-site-access/access-controlled-files/
- * 
- * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/149577
- * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2267/
- */
-if ( '2' === get_option( 'blog_public' ) ) {
-	// Suppress rsa messages.
-	remove_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
-
-	// restrict access to unpublished files if Restricted site access is set.
-	add_filter( 'pre_option_vip_files_acl_restrict_all_enabled', function( $value ) {
-		return 1;
-	} );
 }
 
 /**
@@ -109,6 +91,44 @@ function caweb_vip_init() {
 	foreach ( glob( CAWEB_VIP_PLUGIN_DIR . 'inc/*.php' ) as $file ) {
 		require_once $file;
 	}
+
+	/**
+	 * Restrict site access 
+	 * 
+	 * @see https://docs.wpvip.com/technical-references/restricting-site-access/access-controlled-files/
+	 * 
+	 * @zendesk https://wordpressvip.zendesk.com/hc/en-us/requests/149577
+	 * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2267/
+	 */
+	add_filter('vip_files_acl_file_visibility', function(){
+		global $wp;
+
+        // Set conditions for private network sites.
+        if ( '2' === get_option( 'blog_public' ) ) {
+			// Suppress rsa messages.
+			remove_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
+
+            // Allow access to files for logged-in users.
+			if ( is_user_logged_in() ) {
+                return Automattic\VIP\Files\Acl\FILE_IS_PRIVATE_AND_ALLOWED;
+            }
+
+			
+            // Allow access to files if client IP is in the allowlist.
+            if ( class_exists('Restricted_Site_Access') && null === Restricted_Site_Access::restrict_access_check( $wp ) ) {
+                return Automattic\VIP\Files\Acl\FILE_IS_PRIVATE_AND_ALLOWED;
+            }
+ 
+            // Default to denying access to files for private network sites.
+            return Automattic\VIP\Files\Acl\FILE_IS_PRIVATE_AND_DENIED;
+ 
+		}
+
+        // Default to files being public.
+        return Automattic\VIP\Files\Acl\FILE_IS_PUBLIC;
+
+	}, 20 );
+	
 }
 
 /**
