@@ -5,7 +5,7 @@
  * Description: Resolves several WPVIP Environment issues for the CAWebPublishing Service
  * Author: California Department of Technology
  * Author URI: "https://github.com/Danny-Guzman"
- * Version: 1.0.10
+ * Version: 1.0.11
  * Network: true
  *
  * @package CAWebVIP

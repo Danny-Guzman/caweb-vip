@@ -10,6 +10,9 @@ add_action( 'update_option_caweb_external_js', 'caweb_vip_clear_caweb_external_j
 add_action( 'wp', 'caweb_vip_cache_maxage' );
 add_action( 'restrict_site_access_ip_match ', 'caweb_vip_restrict_site_access_ip_match' );
 
+add_action('add_attachment', 'caweb_vip_add_attachment');
+add_action('wp_get_attachment_image_src', 'caweb_vip_wp_get_attachment_image_src', 10, 4);
+
 
 /**
  * Change WPVIP Cache TTL
@@ -108,4 +111,41 @@ function caweb_vip_restrict_site_access_ip_match( $remote_ip, $line ) {
     session_start();
 
     nocache_headers();
+}
+
+/**
+ * Clear cache whenever an image is added.
+ *
+ * @link https://developer.wordpress.org/reference/hooks/add_attachment/
+ * @param  int $post_id Attachment ID.
+ * @return void
+ */
+function caweb_vip_add_attachment($post_id){
+	if ( ! function_exists( 'wpcom_vip_purge_edge_cache_for_url' ) ) {
+		return;
+	}
+
+	// Get image url.
+	$url = wp_get_attachment_url($post_id);
+
+	// clear the cache for the image url.
+	wpcom_vip_purge_edge_cache_for_url($url);
+}
+
+/**
+ * Clear cache whenever an image is replaced using enable media replace plugin.
+ *
+ * @param  array $image Image.
+ * @param  int $attachment_id Image attachment ID.
+ * @param  string|int $size Image size.
+ * @param  bool $icon Whether the image should fall back to a mime type icon.
+ * @return array|false
+ */
+function caweb_vip_wp_get_attachment_image_src($image, $attachment_id, $size, $icon){
+	if ($image === false) {
+		return $image;
+	}
+
+	// clear the cache for the image id.
+	caweb_vip_add_attachment($attachment_id);
 }
