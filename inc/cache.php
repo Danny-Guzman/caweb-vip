@@ -121,15 +121,14 @@ function caweb_vip_restrict_site_access_ip_match( $remote_ip, $line ) {
  * @return void
  */
 function caweb_vip_add_attachment($post_id){
-	if ( ! function_exists( 'wpcom_vip_purge_edge_cache_for_url' ) ) {
-		return;
+	if ( function_exists( 'wpcom_vip_purge_edge_cache_for_url' ) ) {
+		// Get image url.
+		$url = wp_get_attachment_url($post_id);
+
+		// clear the cache for the image url.
+		wpcom_vip_purge_edge_cache_for_url($url);
 	}
 
-	// Get image url.
-	$url = wp_get_attachment_url($post_id);
-
-	// clear the cache for the image url.
-	wpcom_vip_purge_edge_cache_for_url($url);
 }
 
 /**
@@ -142,10 +141,12 @@ function caweb_vip_add_attachment($post_id){
  * @return array|false
  */
 function caweb_vip_wp_get_attachment_image_src($image, $attachment_id, $size, $icon){
-	if ($image === false) {
-		return $image;
+	$emr = isset($_GET['emr_replaced']) && intval($_GET['emr_replaced'] == 1);
+
+	if ($emr) {
+		// clear the cache for the image id.
+		caweb_vip_add_attachment($attachment_id);
 	}
 
-	// clear the cache for the image id.
-	caweb_vip_add_attachment($attachment_id);
+	return $image;
 }
