@@ -5,7 +5,7 @@
  * Description: Resolves several WPVIP Environment issues for the CAWebPublishing Service
  * Author: California Department of Technology
  * Author URI: "https://github.com/Danny-Guzman"
- * Version: 1.0.11
+ * Version: 1.0.12
  * Network: true
  *
  * @package CAWebVIP
@@ -19,6 +19,7 @@ add_action( 'admin_init', 'caweb_vip_admin_init' );
 add_action( 'admin_enqueue_scripts', 'caweb_vip_enqueue_scripts_styles' );
 add_action( 'admin_head', 'caweb_vip_admin_head', 999 );
 add_action( 'after_setup_theme', 'caweb_vip_after_setup_theme', 1 );
+add_action( 'vip_datasync_cleanup', 'caweb_vip_rsa_update_blog_option_after_datasync' );
 
 add_filter( 'option_jetpack_active_modules', 'caweb_vip_disable_jetpack_modules' );
 add_filter( 'et_core_cache_wpfs_args', 'caweb_vip_wpfs_credentials');
@@ -104,7 +105,7 @@ function caweb_vip_init() {
 		global $wp;
 
         // Set conditions for private network sites.
-        if ( '2' === get_option( 'blog_public' ) ) {
+        if ( 2 === (int) get_option( 'blog_public' ) ) {
 			// Suppress rsa messages.
 			remove_action( 'admin_notices', 'Automattic\VIP\Blog_Public\notice' );
 
@@ -256,4 +257,36 @@ function caweb_vip_admin_head() {
  */
 function caweb_vip_allow_filename_lookup(){
 	remove_action( 'pre_get_posts', 'vip_filter_query_attachment_filenames' );
+}
+
+/**
+ * Data sync post-migration option update for RSA plugin
+ *
+ * @uses vip_datasync_cleanup
+ * @link https://docs.wpvip.com/technical-references/vip-dashboard/data-sync/#h-custom-cleanup-operations
+ */
+function caweb_vip_rsa_update_blog_option_after_datasync(){
+    // Safety first: Don't do anything in the production environment
+    if ('production' === VIP_GO_APP_ENVIRONMENT) {
+        return;
+    }
+
+    // Get all network sites
+    $sites = get_sites();
+
+    // Define the RSA option key and new value
+    $option_key = 'blog_public';
+    $new_value = 2;
+
+    // Loop through each site and update the RSA option value
+    foreach ($sites as $site) {
+        // Switch to the site's context
+        switch_to_blog($site->blog_id);
+
+        // Update the RSA option value for the site
+        update_option($option_key, $new_value);
+
+        // Restore the original site context
+        restore_current_blog();
+    }
 }
