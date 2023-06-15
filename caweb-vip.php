@@ -271,22 +271,18 @@ function caweb_vip_rsa_update_blog_option_after_datasync(){
         return;
     }
 
-    // Get all network sites
-    $sites = get_sites();
+    // Enforce RSA mode across all network sites
+    update_site_option( 'rsa_mode', 'enforce' );
 
-    // Define the RSA option key and new value
-    $option_key = 'blog_public';
-    $new_value = 2;
+    // Update RSA site visibility with blog_public => 2
+    update_site_option( 'blog_public', 2 );
 
-    // Loop through each site and update the RSA option value
-    foreach ($sites as $site) {
-        // Switch to the site's context
-        switch_to_blog($site->blog_id);
+    // Get RSA network options 
+    $rsa_options = get_site_option( 'rsa_options' );
 
-        // Update the RSA option value for the site
-        update_option($option_key, $new_value);
+    // Update RSA option "approach" value to 1 -- "Send them to the WordPress login screen"
+    $rsa_options['approach'] = 1;
 
-        // Restore the original site context
-        restore_current_blog();
-    }
+    // Update the RSA options 
+    update_site_option( 'rsa_options' , $rsa_options );
 }
