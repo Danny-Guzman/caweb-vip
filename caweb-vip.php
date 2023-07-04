@@ -5,7 +5,7 @@
  * Description: Resolves several WPVIP Environment issues for the CAWebPublishing Service
  * Author: California Department of Technology
  * Author URI: "https://github.com/Danny-Guzman"
- * Version: 1.0.12
+ * Version: 1.0.14
  * Network: true
  *
  * @package CAWebVIP
@@ -27,6 +27,16 @@ add_filter( 'et_core_cache_wpfs_args', 'caweb_vip_wpfs_credentials');
 // If New Relic Extension is loaded.
 if( extension_loaded( 'newrelic' ) ){
 	require_once CAWEB_VIP_PLUGIN_DIR . 'core/newrelic.php';
+}
+
+/**
+ * VIP Filesystem is different, therefore the following constant must be defined in order for the Newsletter plugin to have the correct writeable path.
+ * 
+ * @zendesk https://support.wpvip.com/hc/requests/168901
+ * @azure https://cawebpublishing.visualstudio.com/CAWeb/_workitems/edit/2442
+ */
+if( ! defined('NEWSLETTER_LOG_DIR') ){
+	define( 'NEWSLETTER_LOG_DIR', wp_upload_dir()['basedir'] . '/logs/newsletter' );
 }
 
 /**
@@ -93,6 +103,8 @@ function caweb_vip_init() {
 		require_once $file;
 	}
 
+	add_filter( 'do_redirect_guess_404_permalink', '__return_true' );
+	
 	/**
 	 * Restrict site access 
 	 * 
@@ -103,7 +115,7 @@ function caweb_vip_init() {
 	 */
 	add_filter('vip_files_acl_file_visibility', function(){
 		global $wp;
-
+		
         // Set conditions for private network sites.
         if ( 2 === (int) get_option( 'blog_public' ) ) {
 			// Suppress rsa messages.
